@@ -1,0 +1,5 @@
+{
+  "name": "Quran Tracker",
+  "description": "A gamified Quran memorization and recitation tracking app for students, featuring progress tracking, rewards, and audio playback.",
+  "requestFramePermissions": []
+}
