@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, BookOpen, ChevronLeft, ChevronRight, Check, Flame, ArrowLeft, ArrowRight, Lock, Pause, ChevronDown, ChevronUp, Volume2, ThumbsUp, ThumbsDown, Clock, RefreshCw, Trash2, StickyNote, Trophy, Book, Edit, UserPlus, X, Minus, Brain, Settings, Search, History, Calendar, CheckSquare, Home } from 'lucide-react';
+import { Plus, BookOpen, ChevronLeft, ChevronRight, Check, Flame, ArrowLeft, ArrowRight, Lock, Pause, ChevronDown, ChevronUp, Volume2, ThumbsUp, ThumbsDown, Clock, RefreshCw, Trash2, StickyNote, Trophy, Book, Edit, UserPlus, X, Minus, Brain, Settings, Search, History, Calendar, CheckSquare, Home, FileDown, Upload, AlertTriangle } from 'lucide-react';
 import { AUDIO_BASE_URL, SFX_SUCCESS, SFX_CLICK, SFX_MEMORIZED, SFX_NEGATIVE, QURAN_TEXT, SURAHS, INITIAL_STUDENTS } from './constants';
 import { Student, Surah, MemoryHealth, AppSettings } from './types';
 
@@ -68,6 +68,33 @@ const isStreakIntact = (lastTimestamp: number, currentTimestamp: number, require
     return true;
 };
 
+// Parse CSV Line Helper
+function parseCSVLine(text: string) {
+    const result = [];
+    let startValueIndex = 0;
+    let insideQuote = false;
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === '"') {
+            insideQuote = !insideQuote;
+        } else if (text[i] === ',' && !insideQuote) {
+            let val = text.substring(startValueIndex, i);
+            val = val.trim();
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.slice(1, -1).replace(/""/g, '"');
+            }
+            result.push(val);
+            startValueIndex = i + 1;
+        }
+    }
+    let val = text.substring(startValueIndex);
+    val = val.trim();
+    if (val.startsWith('"') && val.endsWith('"')) {
+        val = val.slice(1, -1).replace(/""/g, '"');
+    }
+    result.push(val);
+    return result;
+}
+
 // --- COMPONENTS ---
 const StatsHeader = ({ student, rank }: { student: Student, rank: number }) => {
   let rankStyle = "bg-slate-100 text-slate-500 border-slate-200";
@@ -91,7 +118,14 @@ const StatsHeader = ({ student, rank }: { student: Student, rank: number }) => {
 };
 
 // Settings Sheet
-const SettingsSheet = ({ settings, onSave, onClose }: { settings: AppSettings, onSave: (s: AppSettings) => void, onClose: () => void }) => {
+const SettingsSheet = ({ settings, students, onSave, onImport, onReset, onClose }: { 
+    settings: AppSettings, 
+    students: Student[], 
+    onSave: (s: AppSettings) => void, 
+    onImport: (s: Student[]) => void, 
+    onReset: () => void,
+    onClose: () => void 
+}) => {
     const days = [
         { id: 6, label: 'شنبه' },
         { id: 0, label: 'یک‌شنبه' },
@@ -103,6 +137,7 @@ const SettingsSheet = ({ settings, onSave, onClose }: { settings: AppSettings, o
     ];
 
     const [localSettings, setLocalSettings] = useState(settings);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const toggleDay = (dayId: number, type: 'rokhvani' | 'hefz') => {
         setLocalSettings(prev => {
@@ -117,6 +152,85 @@ const SettingsSheet = ({ settings, onSave, onClose }: { settings: AppSettings, o
                  return { ...prev, hefzDays: newHefz, rokhvaniDays: prev.rokhvaniDays.filter(d => d !== dayId) };
             }
         });
+    };
+
+    const handleExportCSV = () => {
+        const headers = ["ID", "Name", "Diamonds", "Stars", "Pluses", "Note", "Streak", "AyahProgress", "MemorizationProgress", "LastReview", "ReviewHistory", "LastAction"];
+        const csvContent = "\uFEFF" + [ 
+            headers.join(","),
+            ...students.map(s => {
+                return [
+                    s.id,
+                    `"${(s.name || '').replace(/"/g, '""')}"`,
+                    s.diamonds,
+                    s.stars,
+                    s.pluses,
+                    `"${(s.note || '').replace(/"/g, '""')}"`,
+                    s.streak,
+                    `"${JSON.stringify(s.ayahProgress).replace(/"/g, '""')}"`,
+                    `"${JSON.stringify(s.memorizationProgress).replace(/"/g, '""')}"`,
+                    `"${JSON.stringify(s.lastReview).replace(/"/g, '""')}"`,
+                    `"${JSON.stringify(s.reviewHistory || {}).replace(/"/g, '""')}"`,
+                    `"${JSON.stringify(s.lastAction || null).replace(/"/g, '""')}"`
+                ].join(",");
+            })
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `quran-tracker-${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.csv`;
+        link.click();
+    };
+
+    const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const text = evt.target?.result as string;
+                const lines = text.split('\n').filter(l => l.trim() !== '');
+                if (lines.length < 2) { alert('فایل خالی یا نامعتبر است'); return; }
+                
+                const dataLines = lines.slice(1);
+                const parsedStudents: Student[] = dataLines.map(line => {
+                    const cols = parseCSVLine(line);
+                    if (cols.length < 12) return null;
+                    return {
+                        id: Number(cols[0]),
+                        name: cols[1],
+                        diamonds: Number(cols[2]),
+                        stars: Number(cols[3]),
+                        pluses: Number(cols[4]),
+                        note: cols[5],
+                        streak: Number(cols[6]),
+                        ayahProgress: JSON.parse(cols[7] || '{}'),
+                        memorizationProgress: JSON.parse(cols[8] || '{}'),
+                        lastReview: JSON.parse(cols[9] || '{}'),
+                        reviewHistory: JSON.parse(cols[10] || '{}'),
+                        lastAction: cols[11] && cols[11] !== 'null' ? JSON.parse(cols[11]) : undefined,
+                        completedSurahs: []
+                    };
+                }).filter(Boolean) as Student[];
+
+                if (parsedStudents.length > 0) {
+                    if (window.confirm(`تعداد ${parsedStudents.length} رکورد پیدا شد. آیا مطمئن هستید که جایگزین شوند؟ تمام داده‌های فعلی از بین می‌روند.`)) {
+                        onImport(parsedStudents);
+                        onClose();
+                        alert('اطلاعات با موفقیت بازیابی شد.');
+                    }
+                } else {
+                    alert('هیچ داده معتبری یافت نشد.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('خطا در پردازش فایل CSV. مطمئن شوید فرمت فایل صحیح است.');
+            }
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        };
+        reader.readAsText(file);
     };
 
     return (
@@ -156,16 +270,37 @@ const SettingsSheet = ({ settings, onSave, onClose }: { settings: AppSettings, o
                                 );
                             })}
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                            * روزهای <b>روخوانی</b> به عنوان روزهای اجباری برای محاسبه زنجیره (Streak) در نظر گرفته می‌شوند.
-                            <br/>
-                            * روزهای <b>حفظ</b> اختیاری هستند و عدم فعالیت در آن‌ها زنجیره را قطع نمی‌کند.
-                        </p>
+                    </div>
+
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-500 mb-3 flex items-center gap-2"><Upload size={16}/> مدیریت داده‌ها</h3>
+                        <div className="bg-white rounded-2xl border border-slate-200 p-2 grid grid-cols-2 gap-2">
+                             <button onClick={handleExportCSV} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 gap-2 transition-colors border border-slate-100">
+                                <FileDown size={24} className="text-blue-500"/>
+                                <span className="text-xs font-bold">خروجی CSV</span>
+                             </button>
+                             <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 gap-2 transition-colors border border-slate-100">
+                                <Upload size={24} className="text-green-500"/>
+                                <span className="text-xs font-bold">ایمپورت CSV</span>
+                             </button>
+                             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
+                        </div>
                     </div>
 
                     <button onClick={() => { onSave(localSettings); onClose(); }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform">
                         ذخیره تنظیمات
                     </button>
+
+                    <div className="pt-4 border-t border-slate-200">
+                         <button onClick={() => { 
+                             if(window.confirm('هشدار: آیا مطمئن هستید که می‌خواهید تمام داده‌ها را حذف کنید؟ این عملیات غیرقابل بازگشت است.')) {
+                                 onReset();
+                                 onClose();
+                             }
+                         }} className="w-full flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 p-3 rounded-xl border border-red-200 font-bold text-sm active:scale-95 transition-transform">
+                             <Trash2 size={18} /> حذف تمام داده‌ها و شروع مجدد
+                         </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -369,7 +504,20 @@ const TeacherSurahItem: React.FC<{ surah: Surah, student: Student, mode: 'recita
   );
 };
 
-const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeStudentId, onManualPoint, onResetData, onAddStudent, onEditStudent, onDeleteStudent, settings, onUpdateSettings }: { students: Student[], onUpdateProgress: any, onSelectStudent: any, activeStudentId: number | null, onManualPoint: any, onResetData: any, onAddStudent: any, onEditStudent: any, onDeleteStudent: any, settings: AppSettings, onUpdateSettings: (s: AppSettings) => void }) => {
+const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeStudentId, onManualPoint, onResetData, onAddStudent, onEditStudent, onDeleteStudent, settings, onUpdateSettings, onImportData }: { 
+    students: Student[], 
+    onUpdateProgress: any, 
+    onSelectStudent: any, 
+    activeStudentId: number | null, 
+    onManualPoint: any, 
+    onResetData: () => void, 
+    onAddStudent: any, 
+    onEditStudent: any, 
+    onDeleteStudent: any, 
+    settings: AppSettings, 
+    onUpdateSettings: (s: AppSettings) => void,
+    onImportData: (s: Student[]) => void
+}) => {
   // Sort students for display and navigation consistency
   const sortedStudents = [...students].sort((a, b) => {
     if (b.diamonds !== a.diamonds) return b.diamonds - a.diamonds;
@@ -425,7 +573,10 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
       {showSettings && (
           <SettingsSheet 
             settings={settings}
+            students={students}
             onSave={onUpdateSettings}
+            onImport={onImportData}
+            onReset={onResetData}
             onClose={() => setShowSettings(false)}
           />
       )}
@@ -483,7 +634,16 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
           </div>
 
           <div className="relative mb-6">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              {searchQuery ? (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                >
+                  <X size={18} />
+                </button>
+              ) : (
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+              )}
               <input 
                 type="text" 
                 value={searchQuery}
@@ -557,8 +717,6 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
                  <UserPlus size={20} /> افزودن شاگرد جدید
                </button>
             )}
-
-            <div className="mt-8 pt-4 border-t border-slate-100 pb-8"><button onClick={onResetData} className="w-full flex items-center justify-center gap-2 text-xs text-red-400 p-2 hover:text-red-600"><Trash2 size={12} /> حذف تمام داده‌ها و شروع مجدد</button></div>
           </div>
         </>
       ) : (
@@ -620,7 +778,7 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
 const App = () => {
   const [students, setStudents] = useState<Student[]>(() => {
     try {
-      const saved = localStorage.getItem('quran_tracker_students_v1');
+      const saved = localStorage.getItem('quran_tracker_students');
       return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
     } catch (e) {
       return INITIAL_STUDENTS;
@@ -629,143 +787,119 @@ const App = () => {
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     try {
-      const saved = localStorage.getItem('quran_tracker_settings_v1');
-      return saved ? JSON.parse(saved) : { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] };
+      const saved = localStorage.getItem('quran_tracker_settings');
+      return saved ? JSON.parse(saved) : { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4] };
     } catch (e) {
-      return { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] };
+      return { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4] };
     }
   });
 
   const [activeStudentId, setActiveStudentId] = useState<number | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('quran_tracker_students_v1', JSON.stringify(students));
+    localStorage.setItem('quran_tracker_students', JSON.stringify(students));
   }, [students]);
 
   useEffect(() => {
-    localStorage.setItem('quran_tracker_settings_v1', JSON.stringify(settings));
+    localStorage.setItem('quran_tracker_settings', JSON.stringify(settings));
   }, [settings]);
 
-  // Update streaks on load
-  useEffect(() => {
-     setStudents(currentStudents => {
-         const now = Date.now();
-         let changed = false;
-         const updated = currentStudents.map(student => {
-             if (student.lastAction?.timestamp) {
-                 const intact = isStreakIntact(student.lastAction.timestamp, now, settings.rokhvaniDays);
-                 if (!intact && student.streak > 0) {
-                     changed = true;
-                     return { ...student, streak: 0 };
-                 }
-             }
-             return student;
-         });
-         return changed ? updated : currentStudents;
-     });
-  }, [settings.rokhvaniDays]); 
-
-  const handleUpdateProgress = (studentId: number, surahId: number, completedAyahs: number[], mode: 'recitation' | 'memorization', isFullComplete = false) => {
+  const onUpdateProgress = (studentId: number, surahId: number, completedAyahs: number[], mode: 'recitation' | 'memorization', isFullComplete: boolean = false) => {
     setStudents(prev => prev.map(s => {
       if (s.id !== studentId) return s;
-      
       const newS = { ...s };
       if (mode === 'recitation') {
-        newS.ayahProgress = { ...newS.ayahProgress, [surahId]: completedAyahs };
+        newS.ayahProgress = { ...s.ayahProgress, [surahId]: completedAyahs };
       } else {
-        newS.memorizationProgress = { ...newS.memorizationProgress, [surahId]: completedAyahs };
+        newS.memorizationProgress = { ...s.memorizationProgress, [surahId]: completedAyahs };
       }
 
       if (isFullComplete) {
-        newS.lastReview = { ...newS.lastReview, [surahId]: Date.now() };
-        
-        const history = newS.reviewHistory || {};
-        const surahHistory = history[surahId] || [];
-        history[surahId] = [Date.now(), ...surahHistory].slice(0, 5);
-        newS.reviewHistory = history;
+         const now = Date.now();
+         newS.lastReview = { ...s.lastReview, [surahId]: now };
+         const history = s.reviewHistory?.[surahId] || [];
+         newS.reviewHistory = { ...s.reviewHistory, [surahId]: [now, ...history].slice(0, 10) };
 
-        if (mode === 'memorization') {
-             newS.diamonds += 1;
-             newS.streak += 1; 
-        } else {
-             newS.pluses += 1;
-             if (newS.pluses >= 5) {
-                 newS.pluses = 0;
-                 newS.stars += 1;
-             }
-             newS.streak += 1;
-        }
-        newS.lastAction = { type: 'positive', timestamp: Date.now() };
+         const lastTs = s.lastAction?.timestamp || 0;
+         const isStreak = isStreakIntact(lastTs, now, settings.rokhvaniDays);
+         const lastDate = new Date(lastTs).setHours(0,0,0,0);
+         const todayDate = new Date(now).setHours(0,0,0,0);
+         
+         if (isStreak) {
+             if (lastDate !== todayDate) newS.streak += 1;
+         } else {
+             newS.streak = 1;
+         }
+         newS.lastAction = { type: 'positive', timestamp: now };
       }
       return newS;
     }));
   };
 
-  const handleManualPoint = (studentId: number, type: 'positive' | 'negative') => {
-      setStudents(prev => prev.map(s => {
-          if (s.id !== studentId) return s;
-          const newS = { ...s };
-          if (type === 'positive') {
-              newS.pluses += 1;
-              if (newS.pluses >= 5) {
-                  newS.pluses = 0;
-                  newS.stars += 1;
-              }
-              playSound(SFX_SUCCESS);
-          } else {
-              if (newS.pluses > 0) newS.pluses -= 1;
-              playSound(SFX_NEGATIVE);
-          }
-          newS.lastAction = { type, timestamp: Date.now() };
-          return newS;
-      }));
+  const onManualPoint = (studentId: number, type: 'positive' | 'negative') => {
+    setStudents(prev => prev.map(s => {
+      if (s.id !== studentId) return s;
+      let newS = { ...s };
+      const now = Date.now();
+      
+      if (type === 'positive') {
+        playSound(SFX_SUCCESS);
+        newS.pluses += 1;
+        newS.lastAction = { type: 'positive', timestamp: now };
+        if (newS.pluses >= 5) {
+          newS.pluses = 0;
+          newS.stars += 1;
+        }
+        if (newS.stars >= 5) {
+          newS.stars = 0;
+          newS.diamonds += 1;
+        }
+      } else {
+        playSound(SFX_NEGATIVE);
+        if (newS.pluses > 0) newS.pluses -= 1;
+        newS.lastAction = { type: 'negative', timestamp: now };
+      }
+      return newS;
+    }));
   };
 
-  const handleAddStudent = (studentData: any) => {
-      const newStudent: Student = {
-          ...studentData,
-          id: Date.now(),
-          completedSurahs: [],
-          ayahProgress: {},
-          memorizationProgress: {},
-          lastReview: {},
-          streak: 0,
-          diamonds: Number(studentData.diamonds || 0),
-          stars: Number(studentData.stars || 0),
-          pluses: Number(studentData.pluses || 0)
-      };
-      setStudents(prev => [...prev, newStudent]);
+  const onAddStudent = (student: any) => {
+      const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
+      setStudents([...students, { ...student, id: newId, completedSurahs: [], ayahProgress: {}, memorizationProgress: {}, lastReview: {}, streak: 0 }]);
   };
 
-  const handleEditStudent = (id: number, data: any) => {
+  const onEditStudent = (id: number, data: any) => {
       setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   };
 
-  const handleDeleteStudent = (id: number) => {
+  const onDeleteStudent = (id: number) => {
       setStudents(prev => prev.filter(s => s.id !== id));
       if (activeStudentId === id) setActiveStudentId(null);
   };
 
-  const handleResetData = () => {
-      if (window.confirm("آیا مطمئن هستید؟ تمام داده‌ها پاک خواهند شد و قابل بازگشت نیستند.")) {
-          setStudents(INITIAL_STUDENTS);
-          localStorage.removeItem('quran_tracker_students_v1');
-      }
+  const onResetData = () => {
+      setStudents(INITIAL_STUDENTS);
+      setActiveStudentId(null);
+  };
+
+  const onImportData = (newStudents: Student[]) => {
+      setStudents(newStudents);
   };
 
   return (
-    <TeacherDashboard 
+    <TeacherDashboard
       students={students}
       activeStudentId={activeStudentId}
       onSelectStudent={setActiveStudentId}
-      onUpdateProgress={handleUpdateProgress}
-      onManualPoint={handleManualPoint}
-      onResetData={handleResetData}
-      onAddStudent={handleAddStudent}
-      onEditStudent={handleEditStudent}
-      onDeleteStudent={handleDeleteStudent}
+      onUpdateProgress={onUpdateProgress}
+      onManualPoint={onManualPoint}
+      onResetData={onResetData}
+      onAddStudent={onAddStudent}
+      onEditStudent={onEditStudent}
+      onDeleteStudent={onDeleteStudent}
       settings={settings}
       onUpdateSettings={setSettings}
+      onImportData={onImportData}
     />
   );
 };
