@@ -3,6 +3,8 @@ import { Plus, BookOpen, ChevronLeft, ChevronRight, Check, Flame, ArrowLeft, Arr
 import { AUDIO_BASE_URL, SFX_SUCCESS, SFX_CLICK, SFX_MEMORIZED, SFX_NEGATIVE, QURAN_TEXT, SURAHS, INITIAL_STUDENTS } from './constants';
 import { Student, Surah, MemoryHealth, AppSettings } from './types';
 
+const APP_VERSION = "0.2.0";
+
 // --- UTILS ---
 const playSound = (url: string) => { 
   if (navigator.onLine) { 
@@ -300,6 +302,14 @@ const SettingsSheet = ({ settings, students, onSave, onImport, onReset, onClose 
                          }} className="w-full flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 p-3 rounded-xl border border-red-200 font-bold text-sm active:scale-95 transition-transform">
                              <Trash2 size={18} /> حذف تمام داده‌ها و شروع مجدد
                          </button>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
+                        <span className="text-[10px] text-slate-400 font-mono">v{APP_VERSION}</span>
+                        <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 hover:underline flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
+                            <RefreshCw size={10} />
+                            بروزرسانی برنامه
+                        </button>
                     </div>
                 </div>
             </div>
@@ -778,128 +788,148 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
 const App = () => {
   const [students, setStudents] = useState<Student[]>(() => {
     try {
-      const saved = localStorage.getItem('quran_tracker_students');
-      return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-    } catch (e) {
-      return INITIAL_STUDENTS;
+        const saved = localStorage.getItem('quran-tracker-students');
+        return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
+    } catch {
+        return INITIAL_STUDENTS;
     }
   });
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     try {
-      const saved = localStorage.getItem('quran_tracker_settings');
-      return saved ? JSON.parse(saved) : { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4] };
-    } catch (e) {
-      return { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4] };
+        const saved = localStorage.getItem('quran-tracker-settings');
+        return saved ? JSON.parse(saved) : { rokhvaniDays: [0, 2, 4], hefzDays: [1, 3, 5] };
+    } catch {
+        return { rokhvaniDays: [0, 2, 4], hefzDays: [1, 3, 5] };
     }
   });
 
   const [activeStudentId, setActiveStudentId] = useState<number | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('quran_tracker_students', JSON.stringify(students));
+    localStorage.setItem('quran-tracker-students', JSON.stringify(students));
   }, [students]);
 
   useEffect(() => {
-    localStorage.setItem('quran_tracker_settings', JSON.stringify(settings));
+    localStorage.setItem('quran-tracker-settings', JSON.stringify(settings));
   }, [settings]);
 
-  const onUpdateProgress = (studentId: number, surahId: number, completedAyahs: number[], mode: 'recitation' | 'memorization', isFullComplete: boolean = false) => {
+  const handleUpdateProgress = (studentId: number, surahId: number, completedAyahs: number[], mode: 'recitation' | 'memorization', isFullComplete: boolean = false) => {
     setStudents(prev => prev.map(s => {
       if (s.id !== studentId) return s;
-      const newS = { ...s };
+      
+      const newStudent = { ...s };
       if (mode === 'recitation') {
-        newS.ayahProgress = { ...s.ayahProgress, [surahId]: completedAyahs };
+        newStudent.ayahProgress = { ...newStudent.ayahProgress, [surahId]: completedAyahs };
       } else {
-        newS.memorizationProgress = { ...s.memorizationProgress, [surahId]: completedAyahs };
+        newStudent.memorizationProgress = { ...newStudent.memorizationProgress, [surahId]: completedAyahs };
       }
 
       if (isFullComplete) {
          const now = Date.now();
-         newS.lastReview = { ...s.lastReview, [surahId]: now };
-         const history = s.reviewHistory?.[surahId] || [];
-         newS.reviewHistory = { ...s.reviewHistory, [surahId]: [now, ...history].slice(0, 10) };
-
-         const lastTs = s.lastAction?.timestamp || 0;
-         const isStreak = isStreakIntact(lastTs, now, settings.rokhvaniDays);
-         const lastDate = new Date(lastTs).setHours(0,0,0,0);
-         const todayDate = new Date(now).setHours(0,0,0,0);
-         
-         if (isStreak) {
-             if (lastDate !== todayDate) newS.streak += 1;
+         if (mode === 'memorization') {
+             const history = newStudent.reviewHistory?.[surahId] || [];
+             newStudent.reviewHistory = { ...newStudent.reviewHistory, [surahId]: [...history, now] };
+             newStudent.lastReview = { ...newStudent.lastReview, [surahId]: now };
+             newStudent.stars += 1;
          } else {
-             newS.streak = 1;
+             newStudent.pluses += 2;
          }
-         newS.lastAction = { type: 'positive', timestamp: now };
+
+         while (newStudent.pluses >= 5) {
+             newStudent.pluses -= 5;
+             newStudent.stars += 1;
+         }
+         while (newStudent.stars >= 5) {
+             newStudent.stars -= 5;
+             newStudent.diamonds += 1;
+         }
+         
+         const lastActionTime = newStudent.lastAction?.timestamp || 0;
+         const requiredDays = mode === 'recitation' ? settings.rokhvaniDays : settings.hefzDays;
+         const today = new Date().setHours(0,0,0,0);
+         const lastDate = new Date(lastActionTime).setHours(0,0,0,0);
+
+         if (lastDate !== today) {
+             if (isStreakIntact(lastActionTime, now, requiredDays)) {
+                 newStudent.streak += 1;
+             } else {
+                 newStudent.streak = 1;
+             }
+         }
+         
+         newStudent.lastAction = { type: 'positive', timestamp: now };
       }
-      return newS;
+      return newStudent;
     }));
   };
 
-  const onManualPoint = (studentId: number, type: 'positive' | 'negative') => {
+  const handleManualPoint = (id: number, type: 'positive' | 'negative') => {
     setStudents(prev => prev.map(s => {
-      if (s.id !== studentId) return s;
-      let newS = { ...s };
+      if (s.id !== id) return s;
       const now = Date.now();
-      
       if (type === 'positive') {
-        playSound(SFX_SUCCESS);
-        newS.pluses += 1;
-        newS.lastAction = { type: 'positive', timestamp: now };
-        if (newS.pluses >= 5) {
-          newS.pluses = 0;
-          newS.stars += 1;
-        }
-        if (newS.stars >= 5) {
-          newS.stars = 0;
-          newS.diamonds += 1;
-        }
+         playSound(SFX_SUCCESS);
+         let newPluses = s.pluses + 1;
+         let newStars = s.stars;
+         let newDiamonds = s.diamonds;
+         if (newPluses >= 5) { newPluses = 0; newStars++; }
+         if (newStars >= 5) { newStars = 0; newDiamonds++; }
+         return { ...s, pluses: newPluses, stars: newStars, diamonds: newDiamonds, lastAction: { type: 'positive', timestamp: now } };
       } else {
-        playSound(SFX_NEGATIVE);
-        if (newS.pluses > 0) newS.pluses -= 1;
-        newS.lastAction = { type: 'negative', timestamp: now };
+         playSound(SFX_NEGATIVE);
+         return { ...s, pluses: Math.max(0, s.pluses - 1), lastAction: { type: 'negative', timestamp: now } };
       }
-      return newS;
     }));
   };
 
-  const onAddStudent = (student: any) => {
-      const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
-      setStudents([...students, { ...student, id: newId, completedSurahs: [], ayahProgress: {}, memorizationProgress: {}, lastReview: {}, streak: 0 }]);
+  const handleAddStudent = (data: any) => {
+     const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
+     const newStudent: Student = {
+         id: newId,
+         name: data.name,
+         note: data.note,
+         diamonds: data.diamonds || 0,
+         stars: data.stars || 0,
+         pluses: data.pluses || 0,
+         completedSurahs: [],
+         ayahProgress: {},
+         memorizationProgress: {},
+         lastReview: {},
+         streak: 0
+     };
+     setStudents([...students, newStudent]);
   };
 
-  const onEditStudent = (id: number, data: any) => {
+  const handleEditStudent = (id: number, data: any) => {
       setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   };
 
-  const onDeleteStudent = (id: number) => {
+  const handleDeleteStudent = (id: number) => {
       setStudents(prev => prev.filter(s => s.id !== id));
       if (activeStudentId === id) setActiveStudentId(null);
   };
 
-  const onResetData = () => {
+  const handleResetData = () => {
       setStudents(INITIAL_STUDENTS);
+      setSettings({ rokhvaniDays: [0, 2, 4], hefzDays: [1, 3, 5] });
       setActiveStudentId(null);
   };
 
-  const onImportData = (newStudents: Student[]) => {
-      setStudents(newStudents);
-  };
-
   return (
-    <TeacherDashboard
-      students={students}
-      activeStudentId={activeStudentId}
-      onSelectStudent={setActiveStudentId}
-      onUpdateProgress={onUpdateProgress}
-      onManualPoint={onManualPoint}
-      onResetData={onResetData}
-      onAddStudent={onAddStudent}
-      onEditStudent={onEditStudent}
-      onDeleteStudent={onDeleteStudent}
-      settings={settings}
-      onUpdateSettings={setSettings}
-      onImportData={onImportData}
+    <TeacherDashboard 
+       students={students}
+       onUpdateProgress={handleUpdateProgress}
+       onSelectStudent={setActiveStudentId}
+       activeStudentId={activeStudentId}
+       onManualPoint={handleManualPoint}
+       onResetData={handleResetData}
+       onAddStudent={handleAddStudent}
+       onEditStudent={handleEditStudent}
+       onDeleteStudent={handleDeleteStudent}
+       settings={settings}
+       onUpdateSettings={setSettings}
+       onImportData={setStudents}
     />
   );
 };
