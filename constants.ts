@@ -1,6 +1,6 @@
 import { Student, Surah } from './types';
 
-export const AUDIO_BASE_URL = "https://server10.mp3quran.net/minsh/"; 
+export const AUDIO_BASE_URL = "https://download.quranicaudio.com/quran/muhammad_siddiq_al-minshawi/"; 
 export const SFX_SUCCESS = "https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"; 
 export const SFX_CLICK = "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"; 
 export const SFX_MEMORIZED = "https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"; 
