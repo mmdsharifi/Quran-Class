@@ -1,4 +1,5 @@
 import { MemoryHealth } from '../types';
+import confetti from 'canvas-confetti';
 
 export const playSound = (url: string) => { 
   if (navigator.onLine) { 
@@ -6,6 +7,17 @@ export const playSound = (url: string) => {
       new Audio(url).play().catch(e=>{}); 
     } catch(e){} 
   } 
+};
+
+export const triggerConfetti = () => {
+    const colors = ['#EAB308', '#2563EB', '#22C55E']; // Gold, Blue, Green
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: colors,
+        disableForReducedMotion: true
+    });
 };
 
 export const getSurahAudioUrl = (id: number, baseUrl: string) => `${baseUrl}${String(id).padStart(3, '0')}.mp3`;

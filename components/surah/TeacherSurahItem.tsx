@@ -28,7 +28,7 @@ export const TeacherSurahItem: React.FC<{ surah: Surah, student: Student, mode: 
   const handleFullComplete = () => { 
       playSound(mode === 'memorization' ? SFX_MEMORIZED : SFX_SUCCESS); 
       onUpdateProgress(student.id, surah.id, ayahsList, mode, true); 
-      showToast(mode === 'memorization' ? 'حفظ کامل سوره ثبت شد +۱ ⭐️' : 'روخوانی کامل شد +۱ ⭐️', 'success');
+      showToast(mode === 'memorization' ? 'حفظ کامل سوره ثبت شد +۱ ✨🤲🏻' : 'روخوانی کامل شد +۱ ✨🤲🏻', 'success');
   };
 
   return (

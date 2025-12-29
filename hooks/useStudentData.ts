@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Student } from '../types';
-import { INITIAL_STUDENTS, SFX_SUCCESS, SFX_NEGATIVE } from '../constants';
-import { calculateNewPoints, isStreakIntact, playSound } from '../utils/helpers';
+import { INITIAL_STUDENTS, SFX_SUCCESS, SFX_NEGATIVE, SURAHS } from '../constants';
+import { calculateNewPoints, isStreakIntact, playSound, triggerConfetti } from '../utils/helpers';
 
 export const useStudentData = (settings: { hefzDays: number[] }) => {
   const [students, setStudents] = useState<Student[]>(() => {
@@ -9,29 +9,43 @@ export const useStudentData = (settings: { hefzDays: number[] }) => {
       const saved = localStorage.getItem('quran-tracker-students');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed.map((s: any) => ({
-            ...s,
-            diamonds: s.diamonds ?? 0,
-            stars: s.stars ?? 0,
-            pluses: s.pluses ?? 0,
-            streak: s.streak ?? 0,
-            ayahProgress: s.ayahProgress ?? {},
-            memorizationProgress: s.memorizationProgress ?? {},
-            lastReview: s.lastReview ?? {},
-            completedSurahs: s.completedSurahs ?? [],
-        })) : INITIAL_STUDENTS;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            // Ensure all loaded students have the correct structure
+            return parsed.map((s: any) => ({
+                ...s,
+                id: Number(s.id),
+                diamonds: s.diamonds ?? 0,
+                stars: s.stars ?? 0,
+                pluses: s.pluses ?? 0,
+                streak: s.streak ?? 0,
+                ayahProgress: s.ayahProgress ?? {},
+                memorizationProgress: s.memorizationProgress ?? {},
+                lastReview: s.lastReview ?? {},
+                completedSurahs: s.completedSurahs ?? [],
+                // Preserve review history if exists
+                reviewHistory: s.reviewHistory ?? {},
+                lastAction: s.lastAction ?? undefined
+            }));
+        }
       }
       return INITIAL_STUDENTS;
     } catch (e) {
-      console.error("Failed to parse students", e);
+      console.error("Failed to load students from storage, reverting to default:", e);
       return INITIAL_STUDENTS;
     }
   });
 
   const [activeStudentId, setActiveStudentId] = useState<number | null>(null);
 
+  // Save to localStorage whenever students state changes
   useEffect(() => {
-    localStorage.setItem('quran-tracker-students', JSON.stringify(students));
+    if (students && students.length > 0) {
+        try {
+            localStorage.setItem('quran-tracker-students', JSON.stringify(students));
+        } catch (e) {
+            console.error("Failed to save students:", e);
+        }
+    }
   }, [students]);
 
   const handleUpdateProgress = (studentId: number, surahId: number, newCompleted: number[], mode: 'recitation' | 'memorization', isFullComplete: boolean = false) => {
@@ -45,13 +59,26 @@ export const useStudentData = (settings: { hefzDays: number[] }) => {
         updated.memorizationProgress = { ...updated.memorizationProgress, [surahId]: newCompleted };
       }
 
-      if (isFullComplete) {
-         const { pluses, stars, diamonds } = calculateNewPoints(updated, 5);
-         updated.pluses = pluses;
-         updated.stars = stars;
-         updated.diamonds = diamonds;
+      // -- NEW LOGIC: Dynamic Plus for 100% completion --
+      const surah = SURAHS.find(x => x.id === surahId);
+      if (surah) {
+          const totalAyahs = surah.ayahs;
+          const oldList = mode === 'recitation' ? (s.ayahProgress[surahId] || []) : (s.memorizationProgress[surahId] || []);
+          const wasComplete = oldList.length === totalAyahs;
+          const isNowComplete = newCompleted.length === totalAyahs;
 
-         if (mode === 'memorization') {
+          if (!wasComplete && isNowComplete) {
+              triggerConfetti();
+              const newScore = calculateNewPoints(updated, 1);
+              updated.pluses = newScore.pluses;
+              updated.stars = newScore.stars;
+              updated.diamonds = newScore.diamonds;
+          } else if (wasComplete && !isNowComplete) {
+              updated.pluses = Math.max(updated.pluses - 1, 0);
+          }
+      }
+
+      if (mode === 'memorization' && newCompleted.length === (surah?.ayahs || 0) && surah) {
              const now = Date.now();
              updated.lastReview = { ...updated.lastReview, [surahId]: now };
              const history = updated.reviewHistory?.[surahId] || [];
@@ -64,15 +91,12 @@ export const useStudentData = (settings: { hefzDays: number[] }) => {
              if (intact) {
                  const lastDate = new Date(lastActionTimestamp).setHours(0,0,0,0);
                  const todayDate = new Date(now).setHours(0,0,0,0);
-                 if (lastDate !== todayDate) {
-                     newStreak += 1;
-                 }
+                 if (lastDate !== todayDate) newStreak += 1;
              } else {
                  newStreak = 1;
              }
              updated.streak = newStreak;
              updated.lastAction = { type: 'positive', timestamp: now };
-         }
       }
       return updated;
     }));
@@ -83,17 +107,36 @@ export const useStudentData = (settings: { hefzDays: number[] }) => {
           if (s.id !== studentId) return s;
           const change = type === 'positive' ? 1 : -1;
           const newPoints = calculateNewPoints(s, change);
-          
-          if (type === 'positive') playSound(SFX_SUCCESS);
-          else playSound(SFX_NEGATIVE);
-
+          if (type === 'positive') {
+             playSound(SFX_SUCCESS);
+             triggerConfetti();
+          } else {
+             playSound(SFX_NEGATIVE);
+          }
           return { ...s, ...newPoints, lastAction: { type, timestamp: Date.now() } };
       }));
   };
 
   const handleAddStudent = (data: any) => {
-      const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
-      setStudents(prev => [...prev, { ...data, id: newId, completedSurahs: [], ayahProgress: {}, memorizationProgress: {}, lastReview: {}, streak: 0 }]);
+      // Calculate a safe new ID
+      const maxId = students.length > 0 ? Math.max(...students.map(s => s.id)) : 0;
+      const newId = maxId + 1;
+      
+      const newStudent: Student = { 
+          ...data, 
+          id: newId, 
+          completedSurahs: [], 
+          ayahProgress: {}, 
+          memorizationProgress: {}, 
+          lastReview: {},
+          reviewHistory: {}, 
+          streak: 0,
+          diamonds: Number(data.diamonds || 0),
+          stars: Number(data.stars || 0),
+          pluses: Number(data.pluses || 0)
+      };
+      
+      setStudents(prev => [...prev, newStudent]);
   };
 
   const handleEditStudent = (id: number, data: any) => {
@@ -110,8 +153,10 @@ export const useStudentData = (settings: { hefzDays: number[] }) => {
   };
 
   const handleResetData = () => {
-      setStudents(INITIAL_STUDENTS);
-      setActiveStudentId(null);
+      if (window.confirm("آیا مطمئن هستید؟ تمام داده‌ها به حالت اولیه برمی‌گردد.")) {
+        setStudents(INITIAL_STUDENTS);
+        setActiveStudentId(null);
+      }
   };
 
   return {
