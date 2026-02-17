@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, BookOpen, ChevronLeft, ChevronRight, Check, Flame, ArrowLeft, ArrowRight, Lock, Pause, ChevronDown, ChevronUp, Volume2, ThumbsUp, ThumbsDown, Clock, RefreshCw, Trash2, StickyNote, Trophy, Book, Edit, UserPlus, X, Minus, Brain, Settings, Search, History, Calendar, CheckSquare, Home } from 'lucide-react';
-import { AUDIO_BASE_URL, SFX_SUCCESS, SFX_CLICK, SFX_MEMORIZED, SFX_NEGATIVE, QURAN_TEXT, SURAHS, INITIAL_STUDENTS } from './constants';
-import { Student, Surah, MemoryHealth, AppSettings } from './types';
+import { SFX_SUCCESS, SFX_CLICK, SFX_MEMORIZED, SFX_NEGATIVE, QURAN_TEXT, SURAHS, INITIAL_STUDENTS } from './constants';
+import { Student, Surah, AppSettings } from './types';
+import { calculateMemoryHealth, getSurahAudioUrl, getTimeAgoLabel } from './appUtils';
+import { DEFAULT_SETTINGS, applyManualPointForStudent, buildNewStudent, clearBrokenStreaks, deleteStudentById, editStudentById, filterStudentsByQuery, loadJsonFromStorage, sortStudentsByScore, updateProgressForStudent } from './appLogic';
 
 // --- UTILS ---
 const playSound = (url: string) => { 
@@ -12,27 +14,11 @@ const playSound = (url: string) => {
   } 
 };
 
-const getSurahAudioUrl = (id: number) => `${AUDIO_BASE_URL}${String(id).padStart(3, '0')}.mp3`;
-
-const calculateMemoryHealth = (lastReviewTimestamp?: number): MemoryHealth => {
-    if (!lastReviewTimestamp) return { health: 0, status: 'unknown', color: '', barColor: '' };
-    const diffDays = (Date.now() - lastReviewTimestamp) / (1000 * 60 * 60 * 24);
-    if (diffDays < 1) return { health: 100, status: 'fresh', color: 'text-green-500', barColor: 'bg-green-500' };
-    if (diffDays < 3) return { health: 70, status: 'good', color: 'text-green-400', barColor: 'bg-green-400' };
-    if (diffDays < 7) return { health: 40, status: 'warning', color: 'text-yellow-500', barColor: 'bg-yellow-500' };
-    return { health: 10, status: 'critical', color: 'text-red-500', barColor: 'bg-red-500' };
-};
-
 const TimeAgo = ({ timestamp, type }: { timestamp: number, type: 'positive' | 'negative' }) => {
   const [label, setLabel] = useState('');
   useEffect(() => {
     const updateLabel = () => {
-      if (!timestamp) { setLabel(''); return; }
-      const diffSeconds = Math.floor((Date.now() - timestamp) / 1000);
-      if (diffSeconds < 60) setLabel('همین الان');
-      else if (diffSeconds < 3600) setLabel(`${Math.floor(diffSeconds / 60)} دقیقه پیش`);
-      else if (diffSeconds < 86400) setLabel(`${Math.floor(diffSeconds / 3600)} ساعت پیش`);
-      else setLabel('چند روز پیش');
+      setLabel(getTimeAgoLabel(timestamp));
     };
     updateLabel(); 
     const interval = setInterval(updateLabel, 60000); 
@@ -41,31 +27,6 @@ const TimeAgo = ({ timestamp, type }: { timestamp: number, type: 'positive' | 'n
   
   if (!timestamp) return null;
   return (<div className={`text-xs flex items-center gap-1 mt-2 ${type === 'negative' ? 'text-red-400' : 'text-green-500'}`}><Clock size={10} /><span>{type === 'positive' ? 'آخرین تشویق:' : 'آخرین تذکر:'} {label}</span></div>);
-};
-
-// Check if streak is unbroken. 
-// Streak breaks ONLY if a REQUIRED (Rokhvani) day is missed. 
-// Optional days (Hefz) and Off days do not break streak.
-const isStreakIntact = (lastTimestamp: number, currentTimestamp: number, requiredDays: number[]) => {
-    const oneDay = 24 * 60 * 60 * 1000;
-    const last = new Date(lastTimestamp);
-    last.setHours(0,0,0,0);
-    const now = new Date(currentTimestamp);
-    now.setHours(0,0,0,0);
-
-    if (last.getTime() === now.getTime()) return true; 
-
-    // Iterate from the day AFTER last action until YESTERDAY
-    let temp = new Date(last.getTime() + oneDay);
-    while (temp.getTime() < now.getTime()) {
-        const day = temp.getDay(); // 0-6
-        // If we missed a REQUIRED day, streak is broken
-        if (requiredDays.includes(day)) {
-            return false;
-        }
-        temp = new Date(temp.getTime() + oneDay);
-    }
-    return true;
 };
 
 // --- COMPONENTS ---
@@ -257,19 +218,23 @@ const AudioPlayer = ({ surahId }: { surahId: number }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  const togglePlay = (e: React.MouseEvent) => {
+  const togglePlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!navigator.onLine) { alert("برای پخش صوت نیاز به اینترنت است."); return; }
     if (!audioRef.current) { 
-        audioRef.current = new Audio(getSurahAudioUrl(surahId)); 
-        audioRef.current.onended = () => setIsPlaying(false); 
+        audioRef.current = new Audio(getSurahAudioUrl(surahId));
+        audioRef.current.onended = () => setIsPlaying(false);
+        audioRef.current.onpause = () => setIsPlaying(false);
     }
     if (isPlaying) { 
-        audioRef.current.pause(); 
-        setIsPlaying(false); 
-    } else { 
-        audioRef.current.play().catch(e => {}); 
-        setIsPlaying(true); 
+        audioRef.current.pause();
+        return;
+    }
+    try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+    } catch (err) {
+        setIsPlaying(false);
     }
   };
   
@@ -371,11 +336,7 @@ const TeacherSurahItem: React.FC<{ surah: Surah, student: Student, mode: 'recita
 
 const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeStudentId, onManualPoint, onResetData, onAddStudent, onEditStudent, onDeleteStudent, settings, onUpdateSettings }: { students: Student[], onUpdateProgress: any, onSelectStudent: any, activeStudentId: number | null, onManualPoint: any, onResetData: any, onAddStudent: any, onEditStudent: any, onDeleteStudent: any, settings: AppSettings, onUpdateSettings: (s: AppSettings) => void }) => {
   // Sort students for display and navigation consistency
-  const sortedStudents = [...students].sort((a, b) => {
-    if (b.diamonds !== a.diamonds) return b.diamonds - a.diamonds;
-    if (b.stars !== a.stars) return b.stars - a.stars;
-    return b.pluses - a.pluses;
-  });
+  const sortedStudents = sortStudentsByScore(students);
 
   // Find active student index in the sorted list
   const activeStudentIndex = activeStudentId ? sortedStudents.findIndex(s => s.id === activeStudentId) : -1;
@@ -410,7 +371,7 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
       }
   };
 
-  const filteredStudents = sortedStudents.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.name.includes(searchQuery));
+  const filteredStudents = filterStudentsByQuery(sortedStudents, searchQuery);
 
   const activeStudentRank = activeStudentIndex !== -1 ? activeStudentIndex + 1 : 0;
   
@@ -618,23 +579,13 @@ const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeS
 };
 
 const App = () => {
-  const [students, setStudents] = useState<Student[]>(() => {
-    try {
-      const saved = localStorage.getItem('quran_tracker_students_v1');
-      return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-    } catch (e) {
-      return INITIAL_STUDENTS;
-    }
-  });
+  const [students, setStudents] = useState<Student[]>(() =>
+    loadJsonFromStorage(localStorage, 'quran_tracker_students_v1', INITIAL_STUDENTS)
+  );
 
-  const [settings, setSettings] = useState<AppSettings>(() => {
-    try {
-      const saved = localStorage.getItem('quran_tracker_settings_v1');
-      return saved ? JSON.parse(saved) : { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] };
-    } catch (e) {
-      return { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] };
-    }
-  });
+  const [settings, setSettings] = useState<AppSettings>(() =>
+    loadJsonFromStorage(localStorage, 'quran_tracker_settings_v1', DEFAULT_SETTINGS)
+  );
 
   const [activeStudentId, setActiveStudentId] = useState<number | null>(null);
 
@@ -646,103 +597,57 @@ const App = () => {
     localStorage.setItem('quran_tracker_settings_v1', JSON.stringify(settings));
   }, [settings]);
 
-  // Update streaks on load
+  // Keep streaks correct while the app is open (including day changes).
   useEffect(() => {
-     setStudents(currentStudents => {
-         const now = Date.now();
-         let changed = false;
-         const updated = currentStudents.map(student => {
-             if (student.lastAction?.timestamp) {
-                 const intact = isStreakIntact(student.lastAction.timestamp, now, settings.rokhvaniDays);
-                 if (!intact && student.streak > 0) {
-                     changed = true;
-                     return { ...student, streak: 0 };
-                 }
-             }
-             return student;
-         });
-         return changed ? updated : currentStudents;
-     });
+     const refreshStreaks = () => {
+       setStudents(currentStudents =>
+         clearBrokenStreaks({
+           students: currentStudents,
+           now: Date.now(),
+           requiredDays: settings.rokhvaniDays,
+         })
+       );
+     };
+
+     refreshStreaks();
+     const intervalId = window.setInterval(refreshStreaks, 60_000);
+     return () => window.clearInterval(intervalId);
   }, [settings.rokhvaniDays]); 
 
   const handleUpdateProgress = (studentId: number, surahId: number, completedAyahs: number[], mode: 'recitation' | 'memorization', isFullComplete = false) => {
-    setStudents(prev => prev.map(s => {
-      if (s.id !== studentId) return s;
-      
-      const newS = { ...s };
-      if (mode === 'recitation') {
-        newS.ayahProgress = { ...newS.ayahProgress, [surahId]: completedAyahs };
-      } else {
-        newS.memorizationProgress = { ...newS.memorizationProgress, [surahId]: completedAyahs };
-      }
-
-      if (isFullComplete) {
-        newS.lastReview = { ...newS.lastReview, [surahId]: Date.now() };
-        
-        const history = newS.reviewHistory || {};
-        const surahHistory = history[surahId] || [];
-        history[surahId] = [Date.now(), ...surahHistory].slice(0, 5);
-        newS.reviewHistory = history;
-
-        if (mode === 'memorization') {
-             newS.diamonds += 1;
-             newS.streak += 1; 
-        } else {
-             newS.pluses += 1;
-             if (newS.pluses >= 5) {
-                 newS.pluses = 0;
-                 newS.stars += 1;
-             }
-             newS.streak += 1;
-        }
-        newS.lastAction = { type: 'positive', timestamp: Date.now() };
-      }
-      return newS;
-    }));
+    setStudents(prev =>
+      updateProgressForStudent({
+        students: prev,
+        studentId,
+        surahId,
+        completedAyahs,
+        mode,
+        isFullComplete,
+        requiredDays: settings.rokhvaniDays,
+      })
+    );
   };
 
   const handleManualPoint = (studentId: number, type: 'positive' | 'negative') => {
-      setStudents(prev => prev.map(s => {
-          if (s.id !== studentId) return s;
-          const newS = { ...s };
-          if (type === 'positive') {
-              newS.pluses += 1;
-              if (newS.pluses >= 5) {
-                  newS.pluses = 0;
-                  newS.stars += 1;
-              }
-              playSound(SFX_SUCCESS);
-          } else {
-              if (newS.pluses > 0) newS.pluses -= 1;
-              playSound(SFX_NEGATIVE);
+      setStudents(prev => {
+          if (prev.some(s => s.id === studentId)) {
+              playSound(type === 'positive' ? SFX_SUCCESS : SFX_NEGATIVE);
           }
-          newS.lastAction = { type, timestamp: Date.now() };
-          return newS;
-      }));
+          return applyManualPointForStudent({ students: prev, studentId, type });
+      });
   };
 
   const handleAddStudent = (studentData: any) => {
-      const newStudent: Student = {
-          ...studentData,
-          id: Date.now(),
-          completedSurahs: [],
-          ayahProgress: {},
-          memorizationProgress: {},
-          lastReview: {},
-          streak: 0,
-          diamonds: Number(studentData.diamonds || 0),
-          stars: Number(studentData.stars || 0),
-          pluses: Number(studentData.pluses || 0)
-      };
+      const newStudent: Student = buildNewStudent(studentData);
       setStudents(prev => [...prev, newStudent]);
   };
 
   const handleEditStudent = (id: number, data: any) => {
-      setStudents(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+      setStudents(prev => editStudentById({ students: prev, id, data }));
   };
 
   const handleDeleteStudent = (id: number) => {
-      setStudents(prev => prev.filter(s => s.id !== id));
+      setStudents(prev => deleteStudentById({ students: prev, id }));
       if (activeStudentId === id) setActiveStudentId(null);
   };
 
