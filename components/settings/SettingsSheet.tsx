@@ -3,7 +3,8 @@ import { Settings, X, Calendar, Upload, FileDown, Trash2, RefreshCw } from 'luci
 import { AppSettings, Student } from '../../types';
 import { parseCSVLine } from '../../utils/helpers';
 
-const APP_VERSION = "0.3.0";
+const APP_VERSION = __APP_VERSION__;
+const APP_LAST_UPDATE = __APP_LAST_UPDATE__;
 
 export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, onClose, showToast, confirm }: { 
     settings: AppSettings, 
@@ -199,7 +200,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                     </div>
 
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
-                        <span className="text-[10px] text-slate-400 font-mono">v{APP_VERSION}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{APP_VERSION} - {APP_LAST_UPDATE}</span>
                         <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 hover:underline flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
                             <RefreshCw size={10} />
                             بروزرسانی برنامه
