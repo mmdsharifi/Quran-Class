@@ -155,6 +155,16 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
     }, 200);
   };
 
+  const handleTouchCancel = () => {
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      cardRef.current.style.transform = 'translateX(0px)';
+    }
+    setTimeout(() => {
+      if (bgRef.current) bgRef.current.style.opacity = '0';
+    }, 200);
+  };
+
   // Mouse drag handlers (for desktop testing/interactions)
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isEditMode) return;
@@ -235,10 +245,10 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
 
   return (
     <div className="relative overflow-hidden rounded-2xl w-full select-none">
-      {/* Swipe Action Background Layer */}
       <div
         ref={bgRef}
         className="absolute inset-0 rounded-2xl flex items-center justify-between pointer-events-none opacity-0 transition-opacity duration-200"
+        dir="ltr"
       >
         {/* Right Action Overlay (Green praise for positive points) - swipe right */}
         <div
@@ -246,8 +256,8 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
           className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-400 flex items-center justify-start px-6 text-white font-bold opacity-0 transition-opacity duration-150"
         >
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold">تشویق (۱+)</span>
-            <ThumbsUp size={20} className="animate-bounce" />
+            <ThumbsUp size={24} className="animate-bounce" />
+            <span className="text-sm font-bold" dir="rtl">تشویق (۱+)</span>
           </div>
         </div>
 
@@ -257,8 +267,8 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
           className="absolute inset-0 bg-gradient-to-l from-red-500 to-red-400 flex items-center justify-end px-6 text-white font-bold opacity-0 transition-opacity duration-150"
         >
           <div className="flex items-center gap-2">
-            <ThumbsDown size={20} className="animate-bounce" />
-            <span className="text-sm font-bold">تذکر (۱-)</span>
+            <span className="text-sm font-bold" dir="rtl">تذکر (۱-)</span>
+            <ThumbsDown size={24} className="animate-bounce" />
           </div>
         </div>
       </div>
@@ -269,11 +279,12 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative z-10 cursor-grab active:cursor-grabbing"
+        className="relative z-10 cursor-grab active:cursor-grabbing touch-pan-y"
       >
         <button
           onClick={() => {
