@@ -1,0 +1,18 @@
+{
+  "name": "QuClass | شبیه‌ساز کلاس قرآن",
+  "short_name": "QuClass",
+  "description": "دفتر الکترونیکی و شبیه‌ساز هوشمند کلاس‌های قرآن کریم",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#134e4a",
+  "theme_color": "#115e59",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

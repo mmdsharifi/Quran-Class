@@ -12,6 +12,12 @@ import {
   loadJsonFromStorage,
   sortStudentsByScore,
   updateProgressForStudent,
+  buildNewClass,
+  addClass,
+  updateClassInList,
+  deleteClassFromList,
+  migrateLegacyData,
+  importStudentsToClass,
 } from "./appLogic.js";
 
 const makeStudent = (overrides = {}) => ({
@@ -344,3 +350,309 @@ test("deleteStudentById removes matching student", () => {
     [2],
   );
 });
+
+test("buildNewClass constructs a class object with unique id and defaults", () => {
+  const c = buildNewClass({
+    name: "New Class",
+    emoji: "🕌",
+    startDate: "2026-05-21",
+    endDate: "2026-08-21",
+    id: "test-class-id",
+  });
+
+  assert.equal(c.id, "test-class-id");
+  assert.equal(c.name, "New Class");
+  assert.equal(c.emoji, "🕌");
+  assert.equal(c.startDate, "2026-05-21");
+  assert.equal(c.endDate, "2026-08-21");
+  assert.deepEqual(c.settings, { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] });
+  assert.deepEqual(c.students, []);
+  assert.equal(c.archived, false);
+});
+
+test("buildNewClass falls back to default values", () => {
+  const c = buildNewClass({ name: "Minimal Class", id: "some-id" });
+  assert.equal(c.id, "some-id");
+  assert.equal(c.emoji, "📖");
+  assert.equal(c.startDate, "");
+  assert.equal(c.endDate, "");
+  assert.deepEqual(c.students, []);
+  assert.equal(c.archived, false);
+});
+
+test("buildNewClass respects archived field when provided", () => {
+  const c = buildNewClass({ name: "Archived Class", id: "some-id", archived: true });
+  assert.equal(c.archived, true);
+});
+
+test("addClass adds a class to the classes array", () => {
+  const classes = [{ id: "c1", name: "Class 1" }];
+  const newClass = { id: "c2", name: "Class 2" };
+  const updated = addClass(classes, newClass);
+  assert.deepEqual(updated, [
+    { id: "c1", name: "Class 1" },
+    { id: "c2", name: "Class 2" },
+  ]);
+  assert.notEqual(updated, classes); // immutable
+});
+
+test("updateClassInList updates class fields", () => {
+  const classes = [
+    { id: "c1", name: "Class 1", emoji: "📖" },
+    { id: "c2", name: "Class 2", emoji: "🌸" },
+  ];
+  const updated = updateClassInList(classes, "c2", {
+    name: "Updated Class 2",
+    emoji: "🕌",
+  });
+  assert.deepEqual(updated[0], classes[0]);
+  assert.equal(updated[1].name, "Updated Class 2");
+  assert.equal(updated[1].emoji, "🕌");
+});
+
+test("deleteClassFromList removes matching class", () => {
+  const classes = [
+    { id: "c1", name: "Class 1" },
+    { id: "c2", name: "Class 2" },
+  ];
+  const updated = deleteClassFromList(classes, "c1");
+  assert.deepEqual(updated, [{ id: "c2", name: "Class 2" }]);
+});
+
+test("migrateLegacyData migrates students and settings", () => {
+  const mockStorage = {
+    getItem: (key) => {
+      if (key === "quran-tracker-students") {
+        return JSON.stringify([{ id: 1, name: "Ali" }]);
+      }
+      if (key === "quran-tracker-settings") {
+        return JSON.stringify({ rokhvaniDays: [1], hefzDays: [2] });
+      }
+      return null;
+    },
+    removeItem: () => {},
+  };
+
+  const migrated = migrateLegacyData(mockStorage);
+  assert.equal(migrated.length, 1);
+  assert.equal(migrated[0].name, "کلاس ترم پاییز ۴۰۴ 🍁");
+  assert.equal(migrated[0].emoji, "🍁");
+  assert.deepEqual(migrated[0].students, [{ id: 1, name: "Ali" }]);
+  assert.deepEqual(migrated[0].settings, { rokhvaniDays: [1], hefzDays: [2] });
+});
+
+test("migrateLegacyData returns an empty array when no legacy data is found", () => {
+  const mockStorage = {
+    getItem: () => null,
+    removeItem: () => {},
+  };
+  const migrated = migrateLegacyData(mockStorage);
+  assert.deepEqual(migrated, []);
+});
+
+test("buildNewStudent initializes progressLog as an empty array", () => {
+  const s = buildNewStudent({ name: "Ali", diamonds: 1, stars: 2, pluses: 3 }, 1);
+  assert.deepEqual(s.progressLog, []);
+});
+
+test("updateProgressForStudent logs progress additions, removals, and point deltas", () => {
+  const now = 1000000;
+  const students = [
+    makeStudent({
+      id: 1,
+      ayahProgress: {
+        114: [1, 2],
+      },
+      diamonds: 0,
+      stars: 0,
+      pluses: 0,
+      progressLog: [],
+    }),
+  ];
+
+  // Recitation progress update (checking ayahs 3 and 4)
+  const updated1 = updateProgressForStudent({
+    students,
+    studentId: 1,
+    surahId: 114,
+    completedAyahs: [1, 2, 3, 4],
+    mode: "recitation",
+    isFullComplete: false,
+    now,
+    requiredDays: [1],
+  });
+
+  assert.equal(updated1[0].progressLog.length, 1);
+  assert.deepEqual(updated1[0].progressLog[0], {
+    timestamp: now,
+    type: "recitation",
+    surahId: 114,
+    added: [3, 4],
+    removed: [],
+    delta: { diamonds: 0, stars: 0, pluses: 0 },
+  });
+
+  // Recitation progress update with reward
+  // Starts with pluses=4, completes surah, rolls over to stars=1
+  const studentsWithPluses = [
+    makeStudent({
+      id: 1,
+      ayahProgress: { 114: [1, 2, 3, 4] },
+      pluses: 4,
+      stars: 0,
+      diamonds: 0,
+      progressLog: [],
+    }),
+  ];
+
+  const updated2 = updateProgressForStudent({
+    students: studentsWithPluses,
+    studentId: 1,
+    surahId: 114,
+    completedAyahs: [1, 2, 3, 4, 5, 6],
+    mode: "recitation",
+    isFullComplete: true,
+    now,
+    requiredDays: [1],
+  });
+
+  assert.equal(updated2[0].progressLog.length, 1);
+  assert.deepEqual(updated2[0].progressLog[0], {
+    timestamp: now,
+    type: "recitation",
+    surahId: 114,
+    added: [5, 6],
+    removed: [],
+    delta: { diamonds: 0, stars: 1, pluses: -4 },
+  });
+});
+
+test("applyManualPointForStudent logs manual point addition and subtraction with deltas", () => {
+  const now = 2000000;
+  const students = [
+    makeStudent({
+      id: 1,
+      pluses: 1,
+      stars: 0,
+      diamonds: 0,
+      progressLog: [],
+    }),
+  ];
+
+  const updatedPositive = applyManualPointForStudent({
+    students,
+    studentId: 1,
+    type: "positive",
+    now,
+  });
+
+  assert.equal(updatedPositive[0].progressLog.length, 1);
+  assert.deepEqual(updatedPositive[0].progressLog[0], {
+    timestamp: now,
+    type: "point",
+    pointType: "positive",
+    delta: { diamonds: 0, stars: 0, pluses: 1 },
+  });
+
+  const updatedNegative = applyManualPointForStudent({
+    students,
+    studentId: 1,
+    type: "negative",
+    now,
+  });
+
+  assert.equal(updatedNegative[0].progressLog.length, 1);
+  assert.deepEqual(updatedNegative[0].progressLog[0], {
+    timestamp: now,
+    type: "point",
+    pointType: "negative",
+    delta: { diamonds: 0, stars: 0, pluses: -1 },
+  });
+});
+
+test("importStudentsToClass imports students and keeps all past data when keepData is true", () => {
+  const destinationStudents = [makeStudent({ id: 1, name: "Ali" })];
+  const sourceStudents = [
+    makeStudent({
+      id: 10,
+      name: "Reza",
+      note: "Smart",
+      diamonds: 3,
+      stars: 2,
+      pluses: 1,
+      completedSurahs: [114],
+      ayahProgress: { 114: [1, 2, 3] },
+      memorizationProgress: { 114: [1, 2] },
+      streak: 5,
+      progressLog: [{ timestamp: 100, type: "point", delta: { diamonds: 1, stars: 0, pluses: 0 } }],
+    }),
+  ];
+
+  const result = importStudentsToClass({
+    destinationStudents,
+    sourceStudentsToImport: sourceStudents,
+    keepData: true,
+    startId: 5,
+  });
+
+  assert.equal(result.length, 2);
+  assert.equal(result[0].name, "Ali");
+  
+  const imported = result[1];
+  assert.equal(imported.id, 6);
+  assert.equal(imported.name, "Reza");
+  assert.equal(imported.note, "Smart");
+  assert.equal(imported.diamonds, 3);
+  assert.equal(imported.stars, 2);
+  assert.equal(imported.pluses, 1);
+  assert.deepEqual(imported.completedSurahs, [114]);
+  assert.deepEqual(imported.ayahProgress, { 114: [1, 2, 3] });
+  assert.deepEqual(imported.memorizationProgress, { 114: [1, 2] });
+  assert.equal(imported.streak, 5);
+  assert.equal(imported.progressLog.length, 1);
+});
+
+test("importStudentsToClass imports students and resets past data when keepData is false", () => {
+  const destinationStudents = [makeStudent({ id: 1, name: "Ali" })];
+  const sourceStudents = [
+    makeStudent({
+      id: 10,
+      name: "Reza",
+      note: "Smart",
+      diamonds: 3,
+      stars: 2,
+      pluses: 1,
+      completedSurahs: [114],
+      ayahProgress: { 114: [1, 2, 3] },
+      memorizationProgress: { 114: [1, 2] },
+      streak: 5,
+      progressLog: [{ timestamp: 100, type: "point", delta: { diamonds: 1, stars: 0, pluses: 0 } }],
+    }),
+  ];
+
+  const result = importStudentsToClass({
+    destinationStudents,
+    sourceStudentsToImport: sourceStudents,
+    keepData: false,
+    startId: 12,
+  });
+
+  assert.equal(result.length, 2);
+  
+  const imported = result[1];
+  assert.equal(imported.id, 13);
+  assert.equal(imported.name, "Reza");
+  assert.equal(imported.note, "Smart");
+  
+  assert.equal(imported.diamonds, 0);
+  assert.equal(imported.stars, 0);
+  assert.equal(imported.pluses, 0);
+  assert.deepEqual(imported.completedSurahs, []);
+  assert.deepEqual(imported.ayahProgress, {});
+  assert.deepEqual(imported.memorizationProgress, {});
+  assert.equal(imported.streak, 0);
+  assert.deepEqual(imported.progressLog, []);
+});
+
+
+

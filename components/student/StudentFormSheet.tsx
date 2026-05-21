@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Minus, Plus, Check, Trash2 } from 'lucide-react';
 import { Student } from '../../types';
 
-export const StudentFormSheet = ({ student, onSave, onDelete, onClose, showToast, confirm }: { student: Student | null, onSave: (s: any) => void, onDelete: (id: number) => void, onClose: () => void, showToast: any, confirm: any }) => {
+export const StudentFormSheet = ({ student, onSave, onDelete, onClose, onOpenImport, showToast, confirm }: { student: Student | null, onSave: (s: any) => void, onDelete: (id: number) => void, onClose: () => void, onOpenImport: () => void, showToast: any, confirm: any }) => {
   const [name, setName] = useState(student ? student.name : '');
   const [note, setNote] = useState(student ? student.note || '' : '');
   const [diamonds, setDiamonds] = useState(student ? student.diamonds : 0);
@@ -23,6 +23,16 @@ export const StudentFormSheet = ({ student, onSave, onDelete, onClose, showToast
            <h2 className="text-lg font-black text-slate-700">{student ? 'ویرایش مشخصات' : 'شاگرد جدید'}</h2>
            <button onClick={onClose} className="bg-slate-200 p-2 rounded-full text-slate-500 hover:bg-slate-300"><X size={20}/></button>
         </div>
+        
+        {!student && (
+          <button
+            type="button"
+            onClick={onOpenImport}
+            className="w-full bg-blue-50/80 hover:bg-blue-100 text-blue-600 font-bold py-3.5 rounded-xl border border-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 text-sm"
+          >
+            📥 ورود شاگرد از کلاس‌های دیگر
+          </button>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
