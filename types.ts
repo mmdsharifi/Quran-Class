@@ -5,6 +5,20 @@ export interface Surah {
   ayahs: number;
 }
 
+export interface ProgressLogEntry {
+  timestamp: number;
+  type: 'recitation' | 'memorization' | 'point';
+  surahId?: number;
+  added?: number[];
+  removed?: number[];
+  pointType?: 'positive' | 'negative';
+  delta: {
+    diamonds: number;
+    stars: number;
+    pluses: number;
+  };
+}
+
 export interface Student {
   id: number;
   name: string;
@@ -22,6 +36,7 @@ export interface Student {
     type: 'positive' | 'negative';
     timestamp: number;
   };
+  progressLog?: ProgressLogEntry[];
 }
 
 export interface MemoryHealth {
@@ -34,4 +49,15 @@ export interface MemoryHealth {
 export interface AppSettings {
   rokhvaniDays: number[];
   hefzDays: number[];
+}
+
+export interface QuranClass {
+  id: string;
+  name: string;
+  emoji?: string;
+  startDate?: string;
+  endDate?: string;
+  settings: AppSettings;
+  students: Student[];
+  archived?: boolean;
 }

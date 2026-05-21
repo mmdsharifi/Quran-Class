@@ -2,25 +2,32 @@ import React from 'react';
 import { ToastContainer } from './components/common/ToastContainer';
 import { ConfirmationModal } from './components/common/ConfirmationModal';
 import { TeacherDashboard } from './screens/TeacherDashboard';
-import { useStudentData } from './hooks/useStudentData';
-import { useAppSettings } from './hooks/useAppSettings';
+import { useClassData } from './hooks/useClassData';
 import { useFeedback } from './hooks/useFeedback';
 
 const App = () => {
-  const { settings, setSettings } = useAppSettings();
-  
-  const { 
-    students, 
-    activeStudentId, 
-    setActiveStudentId, 
-    handleUpdateProgress, 
-    handleManualPoint, 
-    handleAddStudent, 
-    handleEditStudent, 
-    handleDeleteStudent, 
-    handleImportData, 
-    handleResetData 
-  } = useStudentData({ hefzDays: settings.hefzDays });
+  const {
+    classes,
+    activeClassId,
+    students,
+    settings,
+    activeStudentId,
+    setActiveStudentId,
+    handleSelectClass,
+    handleCreateClass,
+    handleEditClass,
+    handleDeleteClass,
+    handleUpdateProgress,
+    handleManualPoint,
+    handleAddStudent,
+    handleEditStudent,
+    handleDeleteStudent,
+    handleResetData,
+    handleUpdateSettings,
+    handleArchiveClass,
+    handleImportStudentsFromClass,
+    handleImportData,
+  } = useClassData();
 
   const { toasts, modalConfig, addToast, confirmAction } = useFeedback();
 
@@ -30,6 +37,13 @@ const App = () => {
       <ConfirmationModal {...modalConfig} />
       
       <TeacherDashboard
+        classes={classes}
+        activeClassId={activeClassId}
+        onSelectClass={handleSelectClass}
+        onCreateClass={handleCreateClass}
+        onEditClass={handleEditClass}
+        onDeleteClass={handleDeleteClass}
+        onArchiveClass={handleArchiveClass}
         students={students}
         onUpdateProgress={handleUpdateProgress}
         onSelectStudent={setActiveStudentId}
@@ -39,8 +53,9 @@ const App = () => {
         onAddStudent={handleAddStudent}
         onEditStudent={handleEditStudent}
         onDeleteStudent={handleDeleteStudent}
+        onImportStudentsFromClass={handleImportStudentsFromClass}
         settings={settings}
-        onUpdateSettings={setSettings}
+        onUpdateSettings={handleUpdateSettings}
         onImportData={handleImportData}
         showToast={addToast}
         confirm={confirmAction}

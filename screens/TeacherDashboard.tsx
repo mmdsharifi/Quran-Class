@@ -1,14 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, BookOpen, ChevronRight, ChevronLeft, Check, Flame, ArrowRight, ThumbsUp, ThumbsDown, StickyNote, Trophy, Book, Edit, UserPlus, X, Brain, Settings, Search, Home, RefreshCw } from 'lucide-react';
 import { SURAHS, SFX_CLICK } from '../constants';
-import { Student, AppSettings } from '../types';
+import { Student, AppSettings, QuranClass } from '../types';
 import { calculateMemoryHealth, playSound } from '../utils/helpers';
 import { TimeAgo } from '../components/common/TimeAgo';
 import { SettingsSheet } from '../components/settings/SettingsSheet';
 import { StudentFormSheet } from '../components/student/StudentFormSheet';
 import { TeacherSurahItem } from '../components/surah/TeacherSurahItem';
+import { ClassManagementSheet } from '../components/class/ClassManagementSheet';
+import { ImportStudentSheet } from '../components/student/ImportStudentSheet';
 
-export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, activeStudentId, onManualPoint, onResetData, onAddStudent, onEditStudent, onDeleteStudent, settings, onUpdateSettings, onImportData, showToast, confirm }: { 
+export const TeacherDashboard = ({ 
+    classes,
+    activeClassId,
+    onSelectClass,
+    onCreateClass,
+    onEditClass,
+    onDeleteClass,
+    onArchiveClass,
+    students, 
+    onUpdateProgress, 
+    onSelectStudent, 
+    activeStudentId, 
+    onManualPoint, 
+    onResetData, 
+    onAddStudent, 
+    onEditStudent, 
+    onDeleteStudent, 
+    onImportStudentsFromClass,
+    settings, 
+    onUpdateSettings, 
+    onImportData, 
+    showToast, 
+    confirm 
+}: { 
+    classes: QuranClass[],
+    activeClassId: string,
+    onSelectClass: (id: string) => void,
+    onCreateClass: (name: string, emoji: string, startDate?: string, endDate?: string, firstStudentName?: string) => void,
+    onEditClass: (id: string, updatedFields: Partial<QuranClass>) => void,
+    onDeleteClass: (id: string) => void,
+    onArchiveClass: (id: string, archive: boolean) => void,
     students: Student[], 
     onUpdateProgress: any, 
     onSelectStudent: any, 
@@ -18,28 +50,93 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
     onAddStudent: any, 
     onEditStudent: any, 
     onDeleteStudent: any, 
+    onImportStudentsFromClass: (selectedStudents: Student[], keepData: boolean) => void,
     settings: AppSettings, 
     onUpdateSettings: (s: AppSettings) => void,
     onImportData: (s: Student[]) => void,
     showToast: any,
     confirm: any
 }) => {
+  const [timeFilter, setTimeFilter] = useState<'all' | 'week' | 'month'>('all');
+
+  const getPeriodStats = (student: Student, filter: 'all' | 'week' | 'month') => {
+    const stats = {
+      recitation: 0,
+      memorization: 0,
+      diamonds: 0,
+      stars: 0,
+      pluses: 0,
+    };
+
+    if (filter === 'all') {
+      stats.diamonds = student.diamonds || 0;
+      stats.stars = student.stars || 0;
+      stats.pluses = student.pluses || 0;
+      stats.recitation = Object.values(student.ayahProgress || {}).reduce((sum, arr) => sum + (arr?.length || 0), 0);
+      stats.memorization = Object.values(student.memorizationProgress || {}).reduce((sum, arr) => sum + (arr?.length || 0), 0);
+      return stats;
+    }
+
+    const cutoff = Date.now() - (filter === 'week' ? 7 : 30) * 24 * 60 * 60 * 1000;
+    const entries = (student.progressLog || []).filter((e) => e.timestamp >= cutoff);
+
+    for (const e of entries) {
+      if (e.type === 'recitation') {
+        stats.recitation += (e.added?.length || 0) - (e.removed?.length || 0);
+      } else if (e.type === 'memorization') {
+        stats.memorization += (e.added?.length || 0) - (e.removed?.length || 0);
+      }
+      if (e.delta) {
+        stats.diamonds += e.delta.diamonds || 0;
+        stats.stars += e.delta.stars || 0;
+        stats.pluses += e.delta.pluses || 0;
+      }
+    }
+
+    stats.recitation = Math.max(0, stats.recitation);
+    stats.memorization = Math.max(0, stats.memorization);
+    return stats;
+  };
+
+  const studentStatsMap = React.useMemo(() => {
+    const map = new Map<number, ReturnType<typeof getPeriodStats>>();
+    for (const student of students) {
+      map.set(student.id, getPeriodStats(student, timeFilter));
+    }
+    return map;
+  }, [students, timeFilter]);
+
   const sortedStudents = [...students].sort((a, b) => {
-    if (b.diamonds !== a.diamonds) return b.diamonds - a.diamonds;
-    if (b.stars !== a.stars) return b.stars - a.stars;
-    return b.pluses - a.pluses;
+    const statsA = studentStatsMap.get(a.id)!;
+    const statsB = studentStatsMap.get(b.id)!;
+
+    if (statsB.diamonds !== statsA.diamonds) return statsB.diamonds - statsA.diamonds;
+    if (statsB.stars !== statsA.stars) return statsB.stars - statsA.stars;
+    if (statsB.pluses !== statsA.pluses) return statsB.pluses - statsA.pluses;
+    if (statsB.memorization !== statsA.memorization) return statsB.memorization - statsA.memorization;
+    return statsB.recitation - statsA.recitation;
   });
 
   const activeStudentIndex = activeStudentId ? sortedStudents.findIndex(s => s.id === activeStudentId) : -1;
   const activeStudent = activeStudentIndex !== -1 ? sortedStudents[activeStudentIndex] : null;
+
+  const weekStats = activeStudent ? getPeriodStats(activeStudent, 'week') : null;
+  const monthStats = activeStudent ? getPeriodStats(activeStudent, 'month') : null;
+  const allStats = activeStudent ? getPeriodStats(activeStudent, 'all') : null;
 
   const [mode, setMode] = useState<'recitation' | 'memorization'>('recitation');
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false); 
   const [showSettings, setShowSettings] = useState(false);
+  const [showClassManagement, setShowClassManagement] = useState(false);
+  const [showImportSheet, setShowImportSheet] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const activeClass = classes.find(c => c.id === activeClassId && !c.archived) || classes.find(c => !c.archived) || classes[0];
+  const className = activeClass?.name || 'کلاس بی‌نام';
+  const classEmoji = activeClass?.emoji || '🕌';
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const detailContainerRef = useRef<HTMLDivElement>(null);
@@ -127,9 +224,43 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
              setIsAdding(false);
              setEditingStudent(null);
           }}
+          onOpenImport={() => {
+             setIsAdding(false);
+             setShowImportSheet(true);
+          }}
           showToast={showToast}
           confirm={confirm}
         />
+      )}
+
+      {/* Class Management Sheet */}
+      {showClassManagement && (
+          <ClassManagementSheet 
+            classes={classes}
+            activeClassId={activeClassId}
+            onSelectClass={onSelectClass}
+            onCreateClass={onCreateClass}
+            onEditClass={onEditClass}
+            onDeleteClass={onDeleteClass}
+            onArchiveClass={onArchiveClass}
+            onClose={() => setShowClassManagement(false)}
+            showToast={showToast}
+            confirm={confirm}
+          />
+      )}
+
+      {/* Import Student Sheet */}
+      {showImportSheet && (
+          <ImportStudentSheet 
+            classes={classes}
+            activeClassId={activeClassId}
+            onClose={() => setShowImportSheet(false)}
+            onImport={(selectedStudents, keepData) => {
+              onImportStudentsFromClass(selectedStudents, keepData);
+              setShowImportSheet(false);
+            }}
+            showToast={showToast}
+          />
       )}
 
       {/* Main Content Area with Transitions */}
@@ -138,10 +269,25 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
           <div className={`absolute inset-0 bg-slate-100 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? '-translate-x-1/4 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
               <div className="p-4">
                   <div className="flex items-center justify-between mb-6 relative">
-                    <div>
-                       <h2 className="text-2xl font-black text-slate-700">کلاس ترم پاییز ۴۰۴ 🍁</h2>
-                       <p className="text-xs text-slate-400 mt-1">تعداد شاگردان: {students.length}</p>
-                    </div>
+                    <button 
+                       onClick={() => setShowClassManagement(true)}
+                       className="flex flex-col items-start text-right p-2 -m-2 rounded-2xl hover:bg-slate-200/50 active:scale-95 transition-all group focus:outline-none"
+                    >
+                       <h2 className="text-xl font-black text-slate-700 flex items-center gap-1.5">
+                         <span>{classEmoji}</span>
+                         <span className="truncate max-w-[180px]">{className}</span>
+                         <ChevronRight size={16} className="text-slate-400 rotate-90 group-hover:text-blue-600 transition-colors" />
+                       </h2>
+                       <div className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1.5">
+                         <span>شاگردان: {students.length} نفر</span>
+                         {activeClass?.startDate && (
+                           <>
+                             <span>•</span>
+                             <span>دوره: {activeClass.startDate} {activeClass.endDate ? `تا ${activeClass.endDate}` : ''}</span>
+                           </>
+                         )}
+                       </div>
+                    </button>
                     <button 
                        onClick={() => setIsEditMode(!isEditMode)} 
                        className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
@@ -171,6 +317,28 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
                       />
                   </div>
 
+                  {/* Time Filter Tabs */}
+                  <div className="bg-slate-200/60 backdrop-blur-sm p-1 rounded-2xl flex gap-1 mb-6 text-xs font-bold text-slate-500 relative">
+                    <button
+                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('all'); }}
+                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'all' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                    >
+                      کل دوره
+                    </button>
+                    <button
+                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('month'); }}
+                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'month' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                    >
+                      این ماه
+                    </button>
+                    <button
+                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('week'); }}
+                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'week' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                    >
+                      این هفته
+                    </button>
+                  </div>
+
                   <div className="grid gap-3">
                     <p className="text-slate-500 text-sm mb-2 flex items-center gap-2 justify-between">
                        <span className="flex items-center gap-2"><Trophy size={14} className="text-yellow-500"/> {isEditMode ? 'ویرایش شاگردان' : 'رده‌بندی کلاس'}</span>
@@ -181,6 +349,7 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
                        </div>
                     ) : filteredStudents.map((student) => {
                         const globalIndex = sortedStudents.findIndex(s => s.id === student.id);
+                        const stats = studentStatsMap.get(student.id) || { recitation: 0, memorization: 0, diamonds: 0, stars: 0, pluses: 0 };
                         let rankStyle = "bg-slate-100 text-slate-500";
                         let ringColor = "border-slate-100";
                         if (!isEditMode) {
@@ -206,10 +375,32 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
                                     <div className="text-right">
                                       <div className="font-bold text-slate-700 text-sm text-right">{student.name}</div>
                                       {!isEditMode && (
-                                        <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                                          {student.diamonds > 0 && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold"><span className="text-[10px]">💎</span> {student.diamonds}</span>}
-                                          {(student.stars > 0 || student.diamonds > 0) && <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold"><span className="text-[10px]">⭐️</span> {student.stars}</span>}
-                                           {student.pluses > 0 && <span className="text-green-500 text-[10px] font-bold">+{student.pluses}</span>}
+                                        <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                                          {timeFilter === 'all' ? (
+                                            <>
+                                              {student.diamonds > 0 && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold"><span className="text-[10px]">💎</span> {student.diamonds}</span>}
+                                              {(student.stars > 0 || student.diamonds > 0) && <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold"><span className="text-[10px]">⭐️</span> {student.stars}</span>}
+                                              {student.pluses > 0 && <span className="text-green-500 text-[10px] font-bold">+{student.pluses}</span>}
+                                            </>
+                                          ) : (
+                                            <>
+                                              {stats.diamonds > 0 && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold"><span className="text-[10px]">💎</span> {stats.diamonds}</span>}
+                                              {stats.stars > 0 && <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold"><span className="text-[10px]">⭐️</span> {stats.stars}</span>}
+                                              {stats.pluses > 0 && <span className="bg-green-50 text-green-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 font-bold"><span className="text-[10px]">+</span>{stats.pluses}</span>}
+                                              
+                                              {(stats.recitation > 0 || stats.memorization > 0) ? (
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                                                  {stats.recitation > 0 && <span>روخوانی: {stats.recitation}</span>}
+                                                  {stats.recitation > 0 && stats.memorization > 0 && <span className="text-slate-300">•</span>}
+                                                  {stats.memorization > 0 && <span>حفظ: {stats.memorization}</span>}
+                                                </span>
+                                              ) : (
+                                                stats.diamonds === 0 && stats.stars === 0 && stats.pluses === 0 && (
+                                                  <span className="text-[10px] text-slate-300 italic">بدون فعالیت</span>
+                                                )
+                                              )}
+                                            </>
+                                          )}
                                         </div>
                                       )}
                                     </div>
@@ -313,6 +504,57 @@ export const TeacherDashboard = ({ students, onUpdateProgress, onSelectStudent, 
                             </div>
                             {activeStudent.lastAction && (<div className="bg-slate-900/50 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} /></div>)}
                         </div>
+
+                        {/* Progress Report Card */}
+                        {activeStudent && weekStats && monthStats && allStats && (
+                          <div className="bg-white p-4 rounded-2xl mb-6 shadow-sm border border-slate-200/80 text-right">
+                            <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                              <Trophy size={16} className="text-yellow-500 shrink-0" />
+                              <span>گزارش پیشرفت ({activeStudent.name})</span>
+                            </h4>
+                            
+                            <div className="grid grid-cols-4 gap-2 text-center text-[11px] dir-rtl">
+                              {/* Headers */}
+                              <div className="text-right text-slate-400 font-medium py-1">دوره</div>
+                              <div className="text-slate-400 font-medium py-1">روخوانی</div>
+                              <div className="text-slate-400 font-medium py-1">حفظ</div>
+                              <div className="text-slate-400 font-medium py-1 font-bold">امتیازات</div>
+                              
+                              {/* Week Row */}
+                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این هفته</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.recitation} آیه</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.memorization} آیه</div>
+                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                {weekStats.diamonds > 0 && <span>💎{weekStats.diamonds}</span>}
+                                {weekStats.stars > 0 && <span>⭐️{weekStats.stars}</span>}
+                                {weekStats.pluses > 0 && <span className="text-green-500 font-bold">+{weekStats.pluses}</span>}
+                                {weekStats.diamonds === 0 && weekStats.stars === 0 && weekStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                              </div>
+                              
+                              {/* Month Row */}
+                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این ماه</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.recitation} ...</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.memorization} آیه</div>
+                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                {monthStats.diamonds > 0 && <span>💎{monthStats.diamonds}</span>}
+                                {monthStats.stars > 0 && <span>⭐️{monthStats.stars}</span>}
+                                {monthStats.pluses > 0 && <span className="text-green-500 font-bold">+{monthStats.pluses}</span>}
+                                {monthStats.diamonds === 0 && monthStats.stars === 0 && monthStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                              </div>
+                              
+                              {/* All Time Row */}
+                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">کل دوره</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.recitation} آیه</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.memorization} آیه</div>
+                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                {allStats.diamonds > 0 && <span>💎{allStats.diamonds}</span>}
+                                {allStats.stars > 0 && <span>⭐️{allStats.stars}</span>}
+                                {allStats.pluses > 0 && <span className="text-green-500 font-bold">+{allStats.pluses}</span>}
+                                {allStats.diamonds === 0 && allStats.stars === 0 && allStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="bg-slate-200 p-1 rounded-xl flex mb-6 relative">
                             <button onClick={() => setMode('recitation')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'recitation' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><BookOpen size={18} /> روخوانی</button>
