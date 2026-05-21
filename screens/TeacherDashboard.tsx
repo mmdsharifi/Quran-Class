@@ -215,7 +215,7 @@ export const TeacherDashboard = ({
   else if (activeStudentRank === 3) activeRankStyle = "bg-orange-400 text-orange-900 border-orange-500 shadow-orange-500/50";
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row relative bg-slate-100 min-h-screen overflow-hidden">
+    <div className="w-full h-full lg:h-screen flex flex-col lg:flex-row relative bg-slate-100 min-h-screen lg:min-h-0 overflow-hidden">
       {/* Settings Sheet */}
       {showSettings && (
           <SettingsSheet 
