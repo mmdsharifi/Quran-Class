@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 
 import {
   calculateMemoryHealth,
+  getPraiseText,
   getSurahAudioUrl,
   getTimeAgoLabel,
+  getWarningText,
   SURAH_AUDIO_BASE_URL,
 } from "./appUtils.js";
 
@@ -69,3 +71,16 @@ test("getTimeAgoLabel returns day-based fallback label", () => {
   const now = new Date("2026-01-08T12:00:00Z").getTime();
   assert.equal(getTimeAgoLabel(now - 3 * 24 * 60 * 60 * 1000, now), "چند روز پیش");
 });
+
+test("getPraiseText returns correct praise text based on index", () => {
+  assert.equal(getPraiseText(0), "ماشاءالله! 🌟");
+  assert.equal(getPraiseText(1), "بارک‌الله! 👏");
+  assert.equal(getPraiseText(8), "ماشاءالله! 🌟"); // wraparound
+});
+
+test("getWarningText returns correct warning text based on index", () => {
+  assert.equal(getWarningText(0), "تذکر ثبت شد. ⚠️");
+  assert.equal(getWarningText(1), "مواظب باش و دقتت رو بیشتر کن. 🤫");
+  assert.equal(getWarningText(5), "تذکر ثبت شد. ⚠️"); // wraparound
+});
+

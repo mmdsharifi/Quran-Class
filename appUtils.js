@@ -55,3 +55,29 @@ export const getTimeAgoLabel = (timestamp, now = Date.now()) => {
   if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} ساعت پیش`;
   return "چند روز پیش";
 };
+
+export const getPraiseText = (index) => {
+  const praises = [
+    "ماشاءالله! 🌟",
+    "بارک‌الله! 👏",
+    "آفرین! 🎉",
+    "احسنت! 👌",
+    "طیب‌الله! 🕌",
+    "مرحبا! 💖",
+    "تبارک‌الله! 🏆",
+    "عالی بود! ⭐"
+  ];
+  return praises[index % praises.length];
+};
+
+export const getWarningText = (index) => {
+  const warnings = [
+    "تذکر ثبت شد. ⚠️",
+    "مواظب باش و دقتت رو بیشتر کن. 🤫",
+    "سکوت و تمرکز فراموش نشه! 🔇",
+    "نمره منفی ثبت شد. 📋",
+    "تلاش کن تمرکزت رو حفظ کنی. 🧐"
+  ];
+  return warnings[index % warnings.length];
+};
+
