@@ -1,5 +1,11 @@
 import { MemoryHealth } from '../types';
 import confetti from 'canvas-confetti';
+import { isStreakIntact as jsIsStreakIntact } from '../trackerLogic.js';
+import {
+  calculateMemoryHealth as jsCalculateMemoryHealth,
+  getPraiseText as jsGetPraiseText,
+  getWarningText as jsGetWarningText,
+} from '../appUtils.js';
 
 export const playSound = (url: string) => { 
   if (navigator.onLine) { 
@@ -22,47 +28,13 @@ export const triggerConfetti = () => {
 
 export const getSurahAudioUrl = (id: number, baseUrl: string) => `${baseUrl}${String(id).padStart(3, '0')}.mp3`;
 
-export const calculateMemoryHealth = (lastReviewTimestamp?: number): MemoryHealth => {
-    if (!lastReviewTimestamp) return { health: 0, status: 'unknown', color: '', barColor: '' };
-    const diffDays = (Date.now() - lastReviewTimestamp) / (1000 * 60 * 60 * 24);
-    if (diffDays < 1) return { health: 100, status: 'fresh', color: 'text-green-500', barColor: 'bg-green-500' };
-    if (diffDays < 3) return { health: 70, status: 'good', color: 'text-green-400', barColor: 'bg-green-400' };
-    if (diffDays < 7) return { health: 40, status: 'warning', color: 'text-yellow-500', barColor: 'bg-yellow-500' };
-    return { health: 10, status: 'critical', color: 'text-red-500', barColor: 'bg-red-500' };
-};
+export const isStreakIntact = jsIsStreakIntact as (lastTimestamp: number, currentTimestamp: number, requiredDays: number[]) => boolean;
 
-export const isStreakIntact = (lastTimestamp: number, currentTimestamp: number, requiredDays: number[]) => {
-    const oneDay = 24 * 60 * 60 * 1000;
-    const last = new Date(lastTimestamp);
-    last.setHours(0,0,0,0);
-    const now = new Date(currentTimestamp);
-    now.setHours(0,0,0,0);
-    if (last.getTime() === now.getTime()) return true; 
-    let temp = new Date(last.getTime() + oneDay);
-    while (temp.getTime() < now.getTime()) {
-        const day = temp.getDay(); 
-        if (requiredDays.includes(day)) {
-            return false;
-        }
-        temp = new Date(temp.getTime() + oneDay);
-    }
-    return true;
-};
+export const calculateMemoryHealth = jsCalculateMemoryHealth as (lastReviewTimestamp?: number) => MemoryHealth;
 
-export const calculateNewPoints = (current: {pluses: number, stars: number, diamonds: number}, change: number) => {
-    let { pluses, stars, diamonds } = current;
-    pluses += change;
-    while (pluses >= 5) {
-        pluses -= 5;
-        stars += 1;
-    }
-    while (stars >= 5) {
-        stars -= 5;
-        diamonds += 1;
-    }
-    if (pluses < 0) pluses = 0; 
-    return { pluses, stars, diamonds };
-};
+export const getPraiseText = jsGetPraiseText as (index: number) => string;
+
+export const getWarningText = jsGetWarningText as (index: number) => string;
 
 export function parseCSVLine(text: string) {
     const result = [];
@@ -89,28 +61,3 @@ export function parseCSVLine(text: string) {
     result.push(val);
     return result;
 }
-
-export const getPraiseText = (index: number): string => {
-  const praises = [
-    "ماشاءالله! 🌟",
-    "بارک‌الله! 👏",
-    "آفرین! 🎉",
-    "احسنت! 👌",
-    "طیب‌الله! 🕌",
-    "مرحبا! 💖",
-    "تبارک‌الله! 🏆",
-    "عالی بود! ⭐"
-  ];
-  return praises[index % praises.length];
-};
-
-export const getWarningText = (index: number): string => {
-  const warnings = [
-    "تذکر ثبت شد. ⚠️",
-    "مواظب باش و دقتت رو بیشتر کن. 🤫",
-    "سکوت و تمرکز فراموش نشه! 🔇",
-    "نمره منفی ثبت شد. 📋",
-    "تلاش کن تمرکزت رو حفظ کنی. 🧐"
-  ];
-  return warnings[index % warnings.length];
-};

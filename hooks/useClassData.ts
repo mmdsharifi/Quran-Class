@@ -15,6 +15,7 @@ import {
   loadJsonFromStorage,
   DEFAULT_SETTINGS,
   importStudentsToClass,
+  clearBrokenStreaks,
 } from '../appLogic.js';
 
 export const useClassData = () => {
@@ -65,6 +66,21 @@ export const useClassData = () => {
     // Reset active student when class switches
     setActiveStudentId(null);
   }, [activeClassId]);
+
+  // Clear broken streaks on mount
+  useEffect(() => {
+    const now = Date.now();
+    setClasses((prev) =>
+      prev.map((c) => {
+        const updatedStudents = clearBrokenStreaks({
+          students: c.students,
+          now,
+          requiredDays: c.settings.rokhvaniDays,
+        });
+        return { ...c, students: updatedStudents };
+      })
+    );
+  }, []);
 
   const activeClass = classes.find((c) => c.id === activeClassId && !c.archived) || classes.find((c) => !c.archived) || classes[0];
   const students = activeClass ? activeClass.students : [];
@@ -141,7 +157,7 @@ export const useClassData = () => {
       completedAyahs: newCompleted,
       mode,
       isFullComplete,
-      requiredDays: settings.hefzDays, // HefzDays determines optional/required streak checks
+      requiredDays: settings.rokhvaniDays, // rokhvaniDays determines optional/required streak checks
     }) as Student[];
 
     setClasses((prev) =>

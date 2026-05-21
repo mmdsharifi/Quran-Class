@@ -35,6 +35,10 @@ export const updateStreakAfterPositive = ({
   now,
   requiredDays,
 }) => {
+  if (lastActionTimestamp && !isStreakIntact(lastActionTimestamp, now, requiredDays)) {
+    return requiredDays.includes(new Date(now).getDay()) ? 1 : 0;
+  }
+
   if (!requiredDays.includes(new Date(now).getDay())) {
     return currentStreak;
   }
@@ -45,10 +49,6 @@ export const updateStreakAfterPositive = ({
 
   if (startOfDay(lastActionTimestamp) === startOfDay(now)) {
     return Math.max(1, currentStreak);
-  }
-
-  if (!isStreakIntact(lastActionTimestamp, now, requiredDays)) {
-    return 1;
   }
 
   return currentStreak + 1;
