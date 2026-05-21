@@ -53,8 +53,14 @@ export const ImportStudentSheet = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-50 w-full max-w-md rounded-t-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom duration-300">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-50 w-full max-w-md rounded-t-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom duration-300"
+      >
         <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6"></div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-black text-slate-700 flex items-center gap-2">

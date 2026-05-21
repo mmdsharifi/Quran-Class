@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, BookOpen, ChevronRight, ChevronLeft, Check, Flame, ArrowRight, ThumbsUp, ThumbsDown, StickyNote, Trophy, Book, Edit, UserPlus, X, Brain, Settings, Search, Home, RefreshCw } from 'lucide-react';
-import { SURAHS, SFX_CLICK } from '../constants';
+import { SURAHS, SFX_CLICK, SFX_SUCCESS, SFX_NEGATIVE } from '../constants';
 import { Student, AppSettings, QuranClass } from '../types';
-import { calculateMemoryHealth, playSound } from '../utils/helpers';
+import { calculateMemoryHealth, playSound, getPraiseText, getWarningText } from '../utils/helpers';
 import { TimeAgo } from '../components/common/TimeAgo';
 import { SettingsSheet } from '../components/settings/SettingsSheet';
 import { StudentFormSheet } from '../components/student/StudentFormSheet';
 import { TeacherSurahItem } from '../components/surah/TeacherSurahItem';
 import { ClassManagementSheet } from '../components/class/ClassManagementSheet';
 import { ImportStudentSheet } from '../components/student/ImportStudentSheet';
+import { StudentListItem } from '../components/student/StudentListItem';
+
 
 export const TeacherDashboard = ({ 
     classes,
@@ -140,6 +142,22 @@ export const TeacherDashboard = ({
   
   const searchInputRef = useRef<HTMLInputElement>(null);
   const detailContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleLocalManualPoint = (studentId: number, type: 'positive' | 'negative') => {
+    onManualPoint(studentId, type);
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+
+    if (type === 'positive') {
+      playSound(SFX_SUCCESS);
+      const text = getPraiseText(Math.floor(Math.random() * 100));
+      showToast(`${text} تشویق برای ${student.name} ثبت شد (+۱ پلاس)`, 'success');
+    } else {
+      playSound(SFX_NEGATIVE);
+      const text = getWarningText(Math.floor(Math.random() * 100));
+      showToast(`${text} تذکر برای ${student.name} ثبت شد (-۱ پلاس)`, 'error');
+    }
+  };
 
   useEffect(() => {
       const today = new Date().getDay(); 
@@ -350,70 +368,19 @@ export const TeacherDashboard = ({
                     ) : filteredStudents.map((student) => {
                         const globalIndex = sortedStudents.findIndex(s => s.id === student.id);
                         const stats = studentStatsMap.get(student.id) || { recitation: 0, memorization: 0, diamonds: 0, stars: 0, pluses: 0 };
-                        let rankStyle = "bg-slate-100 text-slate-500";
-                        let ringColor = "border-slate-100";
-                        if (!isEditMode) {
-                           if (globalIndex === 0) { rankStyle = "bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200"; ringColor = "border-yellow-400"; }
-                           else if (globalIndex === 1) { rankStyle = "bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200"; ringColor = "border-slate-300"; }
-                           else if (globalIndex === 2) { rankStyle = "bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200"; ringColor = "border-orange-300"; }
-                        }
-
                         return (
-                          <div key={student.id} className="relative group">
-                            <button 
-                              onClick={() => { 
-                                 if (isEditMode) { setEditingStudent(student); } 
-                                 else { playSound(SFX_CLICK); onSelectStudent(student.id); }
-                              }} 
-                              className={`w-full flex flex-col bg-white p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${isEditMode ? 'border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50' : `${globalIndex < 3 ? ringColor : 'border-transparent'} hover:border-green-400`}`}
-                            >
-                               <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-b-2 shadow-sm transition-all ${isEditMode ? 'bg-slate-200 text-slate-400 scale-90' : rankStyle}`}>
-                                       {isEditMode ? <Edit size={18}/> : globalIndex + 1}
-                                    </div>
-                                    <div className="text-right">
-                                      <div className="font-bold text-slate-700 text-sm text-right">{student.name}</div>
-                                      {!isEditMode && (
-                                        <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
-                                          {timeFilter === 'all' ? (
-                                            <>
-                                              {student.diamonds > 0 && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold"><span className="text-[10px]">💎</span> {student.diamonds}</span>}
-                                              {(student.stars > 0 || student.diamonds > 0) && <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold"><span className="text-[10px]">⭐️</span> {student.stars}</span>}
-                                              {student.pluses > 0 && <span className="text-green-500 text-[10px] font-bold">+{student.pluses}</span>}
-                                            </>
-                                          ) : (
-                                            <>
-                                              {stats.diamonds > 0 && <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold"><span className="text-[10px]">💎</span> {stats.diamonds}</span>}
-                                              {stats.stars > 0 && <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold"><span className="text-[10px]">⭐️</span> {stats.stars}</span>}
-                                              {stats.pluses > 0 && <span className="bg-green-50 text-green-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 font-bold"><span className="text-[10px]">+</span>{stats.pluses}</span>}
-                                              
-                                              {(stats.recitation > 0 || stats.memorization > 0) ? (
-                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                                                  {stats.recitation > 0 && <span>روخوانی: {stats.recitation}</span>}
-                                                  {stats.recitation > 0 && stats.memorization > 0 && <span className="text-slate-300">•</span>}
-                                                  {stats.memorization > 0 && <span>حفظ: {stats.memorization}</span>}
-                                                </span>
-                                              ) : (
-                                                stats.diamonds === 0 && stats.stars === 0 && stats.pluses === 0 && (
-                                                  <span className="text-[10px] text-slate-300 italic">بدون فعالیت</span>
-                                                )
-                                              )}
-                                            </>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                  {isEditMode ? (
-                                     <div className="bg-slate-100 p-2 rounded-full text-slate-400"><Settings size={16}/></div>
-                                  ) : (
-                                     Object.keys(student.memorizationProgress || {}).some(id => calculateMemoryHealth(student.lastReview?.[Number(id)]).status === 'critical') ? (<div className="bg-red-50 text-red-500 p-2 rounded-full animate-pulse"><RefreshCw size={14} /></div>) : (<ChevronRight className="text-slate-300 group-hover:-translate-x-1 transition-transform" />)
-                                  )}
-                               </div>
-                               {!isEditMode && student.note && (<div className="mt-2 text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg flex items-start gap-1 w-full text-right border border-slate-100"><StickyNote size={10} className="mt-0.5 text-slate-400 shrink-0" />{student.note}</div>)}
-                            </button>
-                          </div>
+                          <StudentListItem
+                            key={student.id}
+                            student={student}
+                            globalIndex={globalIndex}
+                            stats={stats}
+                            isEditMode={isEditMode}
+                            timeFilter={timeFilter}
+                            activeStudentId={activeStudentId}
+                            onSelect={onSelectStudent}
+                            onEdit={setEditingStudent}
+                            onManualPoint={handleLocalManualPoint}
+                          />
                         );
                     })}
                   </div>
@@ -499,8 +466,8 @@ export const TeacherDashboard = ({
                                 <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div className="bg-green-400 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3 mt-4">
-                                <button onClick={() => onManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsUp size={16} /> تشویق</button>
-                                <button onClick={() => onManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-red-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsDown size={16} /> تذکر</button>
+                                <button onClick={() => handleLocalManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsUp size={16} /> تشویق</button>
+                                <button onClick={() => handleLocalManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-red-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsDown size={16} /> تذکر</button>
                             </div>
                             {activeStudent.lastAction && (<div className="bg-slate-900/50 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} /></div>)}
                         </div>
