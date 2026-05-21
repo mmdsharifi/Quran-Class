@@ -441,6 +441,15 @@ test("migrateLegacyData migrates students and settings", () => {
   assert.deepEqual(migrated[0].settings, { rokhvaniDays: [1], hefzDays: [2] });
 });
 
+test("migrateLegacyData returns an empty array when no legacy data is found", () => {
+  const mockStorage = {
+    getItem: () => null,
+    removeItem: () => {},
+  };
+  const migrated = migrateLegacyData(mockStorage);
+  assert.deepEqual(migrated, []);
+});
+
 test("buildNewStudent initializes progressLog as an empty array", () => {
   const s = buildNewStudent({ name: "Ali", diamonds: 1, stars: 2, pluses: 3 }, 1);
   assert.deepEqual(s.progressLog, []);

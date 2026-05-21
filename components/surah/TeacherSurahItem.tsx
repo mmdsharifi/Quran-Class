@@ -5,7 +5,7 @@ import { QURAN_TEXT, SFX_CLICK, SFX_MEMORIZED, SFX_SUCCESS } from '../../constan
 import { calculateMemoryHealth, playSound } from '../../utils/helpers';
 import { AudioPlayer } from './AudioPlayer';
 
-export const TeacherSurahItem: React.FC<{ surah: Surah, student: Student, mode: 'recitation' | 'memorization', onUpdateProgress: any, showToast: any }> = ({ surah, student, mode, onUpdateProgress, showToast }) => {
+const TeacherSurahItemComponent: React.FC<{ surah: Surah, student: Student, mode: 'recitation' | 'memorization', onUpdateProgress: any, showToast: any }> = ({ surah, student, mode, onUpdateProgress, showToast }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showText, setShowText] = useState(false);
   const progressData = mode === 'recitation' ? student.ayahProgress : student.memorizationProgress;
@@ -99,3 +99,45 @@ export const TeacherSurahItem: React.FC<{ surah: Surah, student: Student, mode: 
     </div>
   );
 };
+
+export const TeacherSurahItem = React.memo(TeacherSurahItemComponent, (prevProps, nextProps) => {
+  if (prevProps.surah.id !== nextProps.surah.id) return false;
+  if (prevProps.mode !== nextProps.mode) return false;
+  if (prevProps.onUpdateProgress !== nextProps.onUpdateProgress) return false;
+  if (prevProps.showToast !== nextProps.showToast) return false;
+
+  const prevStudent = prevProps.student;
+  const nextStudent = nextProps.student;
+  if (prevStudent.id !== nextStudent.id) return false;
+
+  const prevProgress = prevProps.mode === 'recitation'
+    ? prevStudent.ayahProgress?.[prevProps.surah.id]
+    : prevStudent.memorizationProgress?.[prevProps.surah.id];
+  const nextProgress = nextProps.mode === 'recitation'
+    ? nextStudent.ayahProgress?.[nextProps.surah.id]
+    : nextStudent.memorizationProgress?.[nextProps.surah.id];
+
+  if (prevProgress !== nextProgress) {
+    if (!prevProgress || !nextProgress) return false;
+    if (prevProgress.length !== nextProgress.length) return false;
+    for (let i = 0; i < prevProgress.length; i++) {
+      if (prevProgress[i] !== nextProgress[i]) return false;
+    }
+  }
+
+  const prevLastReview = prevStudent.lastReview?.[prevProps.surah.id];
+  const nextLastReview = nextStudent.lastReview?.[nextProps.surah.id];
+  if (prevLastReview !== nextLastReview) return false;
+
+  const prevReviewHistory = prevStudent.reviewHistory?.[prevProps.surah.id];
+  const nextReviewHistory = nextStudent.reviewHistory?.[nextProps.surah.id];
+  if (prevReviewHistory !== nextReviewHistory) {
+    if (!prevReviewHistory || !nextReviewHistory) return false;
+    if (prevReviewHistory.length !== nextReviewHistory.length) return false;
+    for (let i = 0; i < prevReviewHistory.length; i++) {
+      if (prevReviewHistory[i] !== nextReviewHistory[i]) return false;
+    }
+  }
+
+  return true;
+});

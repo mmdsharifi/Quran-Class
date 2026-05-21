@@ -533,7 +533,7 @@ export const TeacherDashboard = ({
                               
                               {/* Month Row */}
                               <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این ماه</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.recitation} ...</div>
+                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.recitation} آیه</div>
                               <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.memorization} آیه</div>
                               <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
                                 {monthStats.diamonds > 0 && <span>💎{monthStats.diamonds}</span>}
