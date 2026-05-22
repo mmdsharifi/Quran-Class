@@ -1,85 +1,91 @@
-# 🕌 کلاس هوشمند قرآن کریم (QuClass)
+# 🕌 Smart Quran Class Management (QuClass)
 
-**QuClass** یک نرم‌افزار هوشمند، مدرن و تعاملی برای مدیریت، شبیه‌سازی و ثبت فعالیت‌های آموزشی کلاس‌های قرآن کریم (روخوانی، حفظ، امتیازات و حضور و غیاب) است. این پروژه به عنوان یک برنامه پیش‌رونده وب (PWA) با طراحی راست‌چین (RTL) و رابط کاربری شیشه‌ای (Glassmorphism) توسعه یافته است.
+**QuClass** is a smart, modern, and interactive application for managing, tracking, and logging educational activities in Quranic classes (recitation, memorization, points, attendance). Designed as a Progressive Web App (PWA) with a stunning glassmorphic UI, it dynamically supports RTL (Farsi) and LTR (English) layouts, as well as Light, Dark, and System themes.
 
----
-
-## 🌟 ویژگی‌های برجسته
-
-### ۱. مدیریت کلاس‌ها و دانش‌آموزان
-*   **افزودن و ویرایش کلاس‌ها:** تعریف کلاس‌های متعدد با نام دلخواه، تاریخ شروع/پایان، و اموجی اختصاصی کلاس.
-*   **آرشیو کلاس‌ها:** امکان آرشیو کردن کلاس‌های قدیمی‌تر برای خلوت نگه‌داشتن منوی فعال، با قابلیت بازیابی مجدد.
-*   **ثبت پرونده شاگردان:** افزودن دانش‌آموزان همراه با یادداشت اختصاصی (مثلاً توضیحات اولیا یا اهداف فردی).
-
-### ۲. انتقال پیشرفته شاگردان (Import)
-*   امکان ایمپورت دسته جمعی دانش‌آموزان از یک کلاس به کلاس دیگر.
-*   قابلیت انتخاب انتقال **همراه با سوابق** (کارهای ثبت شده قبلی، امتیازات و زنجیره‌ها) یا انتقال به عنوان **پروفایل جدید** (فقط نام و یادداشت).
-*   جلوگیری هوشمند از تداخل شناسه‌ها (ID Collisions) در کلاس مقصد.
-
-### ۳. مانیتورینگ پیشرفت دوره‌ای (هفتگی، ماهانه، کل دوره)
-*   **فیلتر زمان پویا:** نمایش جدول رده‌بندی و افتخارات دانش‌آموزان بر اساس بازه‌های زمانی **این هفته**، **این ماه** یا **کل دوره**.
-*   **محاسبه خودکار رشد:** رده‌بندی خودکار بر اساس تعداد آیات خوانده شده، حفظ شده و امتیازات کسب‌شده در بازه انتخابی.
-*   **گزارش پیشرفت جامع:** نمودار خلاصه آماری برای هر دانش‌آموز به صورت تفکیک شده.
-
-### ۴. سیستم پاداش‌دهی گیمیفیکیشن (Gamification)
-*   **زنجیره تداوم فعالیت (Streak):** محاسبه زنجیره روزهای متوالی فعالیت فعال هر دانش‌آموز همراه با انیمیشن شعله 🔥.
-*   **ارتقای خودکار جوایز:** ثبت تشویق‌ها به صورت پلاس (`+`) که در تعداد ۵ عدد تبدیل به ستاره (`⭐️`) و ستاره‌ها تبدیل به الماس (`💎`) می‌شوند.
-*   **سلامت حافظه:** تخمین زمان ماندگاری محفوظات هر سوره در ذهن دانش‌آموز (سبز: تازه، زرد: متوسط، قرمز: نیاز به مرور فوری 🔄).
-
-### ۵. پخش‌کننده صوتی و متن قرآن
-*   نمایش متن کامل سوره‌ها با رسم‌الخط عثمان‌طه.
-*   قابلیت پخش صوتی آیات و سوره‌ها به صورت آنلاین و آفلاین برای تمرین بهتر دانش‌آموزان.
-
-### ۶. پشتیبانی آفلاین کامل (PWA)
-*   طراحی واکنش‌گرا و سازگار با موبایل و تبلت با قابلیت نصب مستقیم روی صفحه اصلی (Add to Home Screen).
-*   مجهز به **سرویس ورکر (Service Worker)** اختصاصی برای کش کردن فایل‌های صوتی، استایل‌ها، فونت‌های گوگل و کتابخانه‌ها جهت کارکرد بدون اینترنت.
+[نسخه فارسی راهنما (readme-fa.md)](./readme-fa.md)
 
 ---
 
-## 🛠️ ساختار فنی پروژه (Tech Stack)
+## 🌟 Key Features
 
-*   **هسته:** React 19, TypeScript
-*   **باندلر:** Vite
-*   **استایل‌دهی:** Tailwind CSS (طراحی شیشه‌ای و کاملاً واکنش‌گرا)
-*   **آیکون‌ها:** Lucide React
-*   **پکیج تعاملی:** Canvas Confetti (برای جشن گرفتن موفقیت‌ها 🎉)
-*   **پایگاه داده موقت:** LocalStorage با مهاجرت خودکار داده‌های قدیمی.
-*   **تست نرم‌افزار:** Node.js native test runner با پوشش تست ۱۰۰ درصدی بخش‌های منطقی.
+### 1. Class & Student Management
+* **Create & Edit Classes:** Define multiple classes with custom names, start/end dates, and a designated class emoji.
+* **Archiving Classes:** Archive older classes to keep your active sidebar clean, with the ability to restore them at any time.
+* **Student Directory:** Add students to classes along with specific teacher notes (e.g., parent feedback or individual learning goals).
+
+### 2. Advanced Student Import
+* Batch import students from one class to another.
+* Import with **full history** (past records, points, and streaks) or as a **new profile** (only name and note).
+* Smart collision detection prevents duplicated/conflicting IDs in the destination class.
+
+### 3. Periodic Progress Monitoring (Weekly, Monthly, Overall)
+* **Dynamic Time Filtering:** View leaderboard standings and student honors filtered by **This Week**, **This Month**, or **All Time**.
+* **Automatic Growth Calculation:** Standings are computed dynamically based on completed recitation/memorization ayahs and point deltas.
+* **Detailed Progress Reports:** Interactive charts showing a comprehensive breakdown of each student's progress.
+
+### 4. Gamified Reward System
+* **Activity Streaks:** Tracks daily activity with a visual streak flame 🔥 when students practice consistently on required days.
+* **Automatic Reward Progression:** Pluses (`+`) automatically convert to Stars (`⭐️`) at 5 points, and Stars convert to Diamonds (`💎`) at 5 stars.
+* **Memory Health Tracker:** Automatically estimates retention strength for memorized Surahs (Green: Fresh, Yellow: Good, Orange: Warning, Red: Critical / Needs Review 🔄).
+
+### 5. Surah Audio Player & Text
+* View the complete text of Surahs using the clear Uthmani script.
+* Stream audio recitations online or offline to facilitate student pronunciation and practice.
+
+### 6. PWA & Offline Support
+* Responsive, mobile-first design that can be installed directly onto your device's home screen.
+* Dedicated **Service Worker** caching assets, audio streams, styles, Google Fonts, and external libraries to enable seamless offline usage.
+
+### 7. Dual-Language & Theme Support
+* Dynamic language switching between **Persian (RTL)** and **English (LTR)** with appropriate typography and layout alignment mirroring.
+* Native system-aware theme resolution supporting **Light Mode**, **Dark Mode**, and **System Theme** overrides.
 
 ---
 
-## 🚀 راه اندازی و توسعه محلی
+## 🛠️ Tech Stack
 
-### پیش‌نیازها
-*   Node.js (نسخه ۱۸ به بالا)
+* **Core:** React 19, TypeScript
+* **Bundler:** Vite
+* **Styling:** Vanilla CSS (enhanced with Tailwind CSS variables and logical properties)
+* **Icons:** Lucide React
+* **Interactivity:** Canvas Confetti (celebrating milestones 🎉)
+* **Storage:** LocalStorage with automated schema migration.
+* **Testing:** Node.js native test runner with type-stripping support.
 
-### مراحل اجرا
-۱. نصب وابستگی‌ها:
+---
+
+## 🚀 Getting Started & Local Development
+
+### Prerequisites
+* Node.js (version 18 or higher)
+
+### Installation & Run
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-۲. اجرای پروژه در حالت توسعه:
+2. Start the development server:
 ```bash
 npm run dev
 ```
 
-۳. بیلد نهایی پروژه برای تولید:
+3. Build the production application bundle:
 ```bash
 npm run build
 ```
 
-۴. اجرای تست‌های واحد و بررسی پوشش تست (Coverage):
+4. Run unit tests and coverage:
 ```bash
-# اجرای تست‌ها
+# Run all unit tests
 npm test
 
-# اجرای تست‌ها همراه با گزارش پوشش خطوط
+# Run tests with HTML coverage reports
 npm run test:coverage
 ```
 
 ---
 
-## 📦 استقرار (Deployment)
+## 📦 Deployment
 
-این پروژه را می‌توان به راحتی بر روی سرورهای **Vercel** یا **Netlify** مستقر کرد. فایل‌های ایستا در پوشه `dist` تولید می‌شوند و فایل‌های PWA (`manifest.json` و `sw.js`) در ریشه خروجی کپی خواهند شد.
+You can deploy QuClass statically to hosting platforms like **Vercel** or **Netlify**. Static bundle output is built into the `dist` folder. All assets (including the PWA `manifest.json` and service worker `sw.js`) are compiled automatically.
