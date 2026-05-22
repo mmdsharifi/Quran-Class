@@ -7,8 +7,7 @@ const startOfDay = (timestamp) => {
   return day.getTime();
 };
 
-export const isStreakIntact = (lastTimestamp, currentTimestamp, requiredDays) => {
-  const oneDay = 24 * 60 * 60 * 1000;
+export const isStreakIntact = (lastTimestamp, currentTimestamp, requiredDays = []) => {
   const last = new Date(lastTimestamp);
   last.setHours(0, 0, 0, 0);
   const now = new Date(currentTimestamp);
@@ -18,12 +17,13 @@ export const isStreakIntact = (lastTimestamp, currentTimestamp, requiredDays) =>
     return true;
   }
 
-  let cursor = new Date(last.getTime() + oneDay);
+  let cursor = new Date(last);
+  cursor.setDate(cursor.getDate() + 1);
   while (cursor.getTime() < now.getTime()) {
     if (requiredDays.includes(cursor.getDay())) {
       return false;
     }
-    cursor = new Date(cursor.getTime() + oneDay);
+    cursor.setDate(cursor.getDate() + 1);
   }
 
   return true;
@@ -33,7 +33,7 @@ export const updateStreakAfterPositive = ({
   currentStreak,
   lastActionTimestamp,
   now,
-  requiredDays,
+  requiredDays = [],
 }) => {
   if (lastActionTimestamp && !isStreakIntact(lastActionTimestamp, now, requiredDays)) {
     return requiredDays.includes(new Date(now).getDay()) ? 1 : 0;

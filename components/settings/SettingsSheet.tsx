@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Settings, X, Calendar, Upload, FileDown, Trash2, RefreshCw } from 'lucide-react';
 import { AppSettings, Student } from '../../types';
-import { parseCSVLine } from '../../utils/helpers';
+import { parseCSV } from '../../utils/helpers';
 import { translate } from '../../translations';
 
 const APP_VERSION = __APP_VERSION__;
@@ -88,13 +88,13 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
         reader.onload = (evt) => {
             try {
                 const text = evt.target?.result as string;
-                const lines = text.split('\n').filter(l => l.trim() !== '');
-                if (lines.length < 2) { showToast(t('csvRestoreInvalid'), 'error'); return; }
+                const csvRows = parseCSV(text);
+                if (csvRows.length < 2) { showToast(t('csvRestoreInvalid'), 'error'); return; }
                 
-                const dataLines = lines.slice(1);
-                const parsedStudents: Student[] = dataLines.map(line => {
-                    const cols = parseCSVLine(line);
+                const dataLines = csvRows.slice(1);
+                const parsedStudents: Student[] = dataLines.map(cols => {
                     if (cols.length < 12) return null;
+                    if (!cols[1] || cols[1].trim() === '') return null; // Defensive check for student name
 
                     const safeJsonParse = (str: string, fallback: any = {}) => {
                         try {

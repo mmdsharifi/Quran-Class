@@ -120,14 +120,21 @@ export const useClassData = () => {
   };
 
   const handleDeleteClass = (classId: string) => {
-    if (classes.length <= 1) {
-      return; // Cannot delete the last class
-    }
-    setClasses((prev) => deleteClassFromList(prev, classId));
-    if (activeClassId === classId) {
-      const remaining = classes.filter((c) => c.id !== classId);
-      setActiveClassId(remaining[0].id);
-    }
+    setClasses((prev) => {
+      if (prev.length <= 1) {
+        return prev; // Cannot delete the last class
+      }
+      const nextClasses = deleteClassFromList(prev, classId);
+      if (activeClassId === classId) {
+        const remainingActive = nextClasses.find((c) => !c.archived);
+        if (remainingActive) {
+          setActiveClassId(remainingActive.id);
+        } else if (nextClasses.length > 0) {
+          setActiveClassId(nextClasses[0].id);
+        }
+      }
+      return nextClasses;
+    });
   };
 
   const handleArchiveClass = (classId: string, archive: boolean) => {
@@ -150,55 +157,68 @@ export const useClassData = () => {
     mode: 'recitation' | 'memorization',
     isFullComplete: boolean = false
   ) => {
-    const updatedStudents = updateProgressForStudent({
-      students,
-      studentId,
-      surahId,
-      completedAyahs: newCompleted,
-      mode,
-      isFullComplete,
-      requiredDays: settings.rokhvaniDays, // rokhvaniDays determines optional/required streak checks
-    }) as Student[];
-
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: updatedStudents })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const currentSettings = activeC.settings || DEFAULT_SETTINGS;
+      const updatedStudents = updateProgressForStudent({
+        students: currentStudents,
+        studentId,
+        surahId,
+        completedAyahs: newCompleted,
+        mode,
+        isFullComplete,
+        requiredDays: currentSettings.rokhvaniDays,
+      }) as Student[];
+      return updateClassInList(prev, activeClassId, { students: updatedStudents });
+    });
   };
 
   const handleManualPoint = (studentId: number, type: 'positive' | 'negative') => {
-    const updatedStudents = applyManualPointForStudent({
-      students,
-      studentId,
-      type,
-    }) as Student[];
-
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: updatedStudents })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const updatedStudents = applyManualPointForStudent({
+        students: currentStudents,
+        studentId,
+        type,
+      }) as Student[];
+      return updateClassInList(prev, activeClassId, { students: updatedStudents });
+    });
   };
 
   const handleAddStudent = (data: any) => {
-    const maxId = students.length > 0 ? Math.max(...students.map((s) => s.id)) : 0;
-    const newId = maxId + 1;
-    const newStudent = buildNewStudent(data, newId) as Student;
-
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: [...students, newStudent] })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const maxId = currentStudents.length > 0 ? Math.max(...currentStudents.map((s) => s.id)) : 0;
+      const newId = maxId + 1;
+      const newStudent = buildNewStudent(data, newId) as Student;
+      return updateClassInList(prev, activeClassId, { students: [...currentStudents, newStudent] });
+    });
   };
 
   const handleEditStudent = (id: number, data: any) => {
-    const updatedStudents = editStudentById({ students, id, data }) as Student[];
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: updatedStudents })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const updatedStudents = editStudentById({ students: currentStudents, id, data }) as Student[];
+      return updateClassInList(prev, activeClassId, { students: updatedStudents });
+    });
   };
 
   const handleDeleteStudent = (id: number) => {
-    const updatedStudents = deleteStudentById({ students, id }) as Student[];
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: updatedStudents })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const updatedStudents = deleteStudentById({ students: currentStudents, id }) as Student[];
+      return updateClassInList(prev, activeClassId, { students: updatedStudents });
+    });
     if (activeStudentId === id) setActiveStudentId(null);
   };
 
@@ -206,17 +226,19 @@ export const useClassData = () => {
     selectedStudents: Student[],
     keepData: boolean
   ) => {
-    const maxId = students.length > 0 ? Math.max(...students.map((s) => s.id)) : 0;
-    const updatedStudents = importStudentsToClass({
-      destinationStudents: students,
-      sourceStudentsToImport: selectedStudents,
-      keepData,
-      startId: maxId,
-    }) as Student[];
-
-    setClasses((prev) =>
-      updateClassInList(prev, activeClassId, { students: updatedStudents })
-    );
+    setClasses((prev) => {
+      const activeC = prev.find((c) => c.id === activeClassId) || prev[0];
+      if (!activeC) return prev;
+      const currentStudents = activeC.students || [];
+      const maxId = currentStudents.length > 0 ? Math.max(...currentStudents.map((s) => s.id)) : 0;
+      const updatedStudents = importStudentsToClass({
+        destinationStudents: currentStudents,
+        sourceStudentsToImport: selectedStudents,
+        keepData,
+        startId: maxId,
+      }) as Student[];
+      return updateClassInList(prev, activeClassId, { students: updatedStudents });
+    });
   };
 
   const handleImportData = (data: Student[]) => {

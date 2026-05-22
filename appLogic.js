@@ -184,13 +184,13 @@ export const applyManualPointForStudent = ({
   });
 
 export const buildNewStudent = (studentData, id = Date.now()) => ({
-  ...studentData,
-  id,
   completedSurahs: [],
   ayahProgress: {},
   memorizationProgress: {},
   lastReview: {},
   streak: 0,
+  ...studentData,
+  id,
   diamonds: Number(studentData.diamonds || 0),
   stars: Number(studentData.stars || 0),
   pluses: Number(studentData.pluses || 0),
