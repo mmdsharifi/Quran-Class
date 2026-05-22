@@ -200,6 +200,25 @@ export const TeacherDashboard = ({
       }
   }, [activeStudentId]);
 
+  // Wire up swipe-to-back gesture on the student detail panel
+  useEffect(() => {
+    const container = detailContainerRef.current;
+    if (!container || !activeStudentId) return;
+
+    // fa (Persian) is RTL: swipe LEFT to go back
+    // en (English) is LTR: swipe RIGHT to go back
+    const swipeDirection = language === 'fa' ? 'rtl' : 'ltr';
+
+    const cleanup = setupSwipeBack(container, {
+      direction: swipeDirection,
+      onBack: () => onSelectStudent(null),
+      playSound,
+      sfxClick: SFX_CLICK,
+    });
+
+    return cleanup;
+  }, [activeStudentId, language]);
+
   const goToNextStudent = () => { 
       if (activeStudentIndex !== -1 && activeStudentIndex < sortedStudents.length - 1) {
           onSelectStudent(sortedStudents[activeStudentIndex + 1].id);
@@ -482,7 +501,7 @@ export const TeacherDashboard = ({
               {/* Detail View */}
               <div 
                  ref={detailContainerRef}
-                 className={`absolute inset-0 bg-slate-100 dark:bg-slate-950 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? 'translate-x-0' : 'translate-x-full'} lg:relative lg:inset-auto lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:flex-1 lg:h-full lg:pb-0`}
+                 className={`absolute inset-0 bg-slate-100 dark:bg-slate-950 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? 'translate-x-0' : language === 'fa' ? '-translate-x-full' : 'translate-x-full'} lg:relative lg:inset-auto lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:flex-1 lg:h-full lg:pb-0`}
               >
                   {activeStudent ? (
                       <div className="pb-4">
