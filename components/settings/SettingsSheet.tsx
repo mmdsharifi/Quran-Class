@@ -152,36 +152,36 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
         >
             <div 
                 onClick={(e) => e.stopPropagation()}
-                className="bg-slate-50 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[90vh] lg:max-h-[85vh] overflow-y-auto"
+                className="bg-slate-50 dark:bg-slate-900 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[90vh] lg:max-h-[85vh] overflow-y-auto"
             >
-                <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6"></div>
+                <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-black text-slate-700 flex items-center gap-2"><Settings size={20}/> تنظیمات کلاس</h2>
-                    <button onClick={onClose} className="bg-slate-200 p-2 rounded-full text-slate-500 hover:bg-slate-300"><X size={20}/></button>
+                    <h2 className="text-lg font-black text-slate-700 dark:text-slate-200 flex items-center gap-2"><Settings size={20}/> {t('classSettings')}</h2>
+                    <button onClick={onClose} className="bg-slate-200 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700"><X size={20}/></button>
                 </div>
 
                 <div className="space-y-6">
                     <div>
-                        <h3 className="text-sm font-bold text-slate-500 mb-3 flex items-center gap-2"><Calendar size={16}/> برنامه هفتگی</h3>
-                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2"><Calendar size={16}/> {t('weeklySchedule')}</h3>
+                        <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                             {days.map(day => {
                                 const isRokhvani = localSettings.rokhvaniDays.includes(day.id);
                                 const isHefz = localSettings.hefzDays.includes(day.id);
                                 return (
-                                    <div key={day.id} className="flex items-center justify-between p-3 border-b border-slate-100 last:border-0">
-                                        <span className="text-sm font-bold text-slate-700 w-20">{day.label}</span>
+                                    <div key={day.id} className="flex items-center justify-between p-3 border-b border-slate-100 dark:border-slate-900 last:border-0">
+                                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300 w-20">{day.label}</span>
                                         <div className="flex gap-2">
                                             <button 
                                                 onClick={() => toggleDay(day.id, 'rokhvani')}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isRokhvani ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isRokhvani ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-850'}`}
                                             >
-                                                روخوانی
+                                                {t('recitation')}
                                             </button>
                                             <button 
                                                 onClick={() => toggleDay(day.id, 'hefz')}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isHefz ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isHefz ? 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-850'}`}
                                             >
-                                                حفظ
+                                                {t('memorization')}
                                             </button>
                                         </div>
                                     </div>

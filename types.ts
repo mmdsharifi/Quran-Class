@@ -49,6 +49,7 @@ export interface MemoryHealth {
 export interface AppSettings {
   rokhvaniDays: number[];
   hefzDays: number[];
+  theme?: 'light' | 'dark' | 'system';
 }
 
 export interface QuranClass {

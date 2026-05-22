@@ -215,7 +215,7 @@ export const TeacherDashboard = ({
   else if (activeStudentRank === 3) activeRankStyle = "bg-orange-400 text-orange-900 border-orange-500 shadow-orange-500/50";
 
   return (
-    <div className="w-full h-full lg:h-screen flex flex-col lg:flex-row relative bg-slate-100 min-h-screen lg:min-h-0 overflow-hidden">
+    <div className="w-full h-full lg:h-screen flex flex-col lg:flex-row relative bg-slate-100 dark:bg-slate-950 min-h-screen lg:min-h-0 overflow-hidden">
       {/* Settings Sheet */}
       {showSettings && (
           <SettingsSheet 
@@ -632,22 +632,22 @@ export const TeacherDashboard = ({
           </div>
 
           {/* Persistent Bottom Navigation */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-between items-center z-50 max-w-md mx-auto shadow-[0_-5px_20px_rgba(0,0,0,0.05)] px-6 py-2 lg:hidden">
-            <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-400 hover:text-blue-600 p-2 active:scale-95 transition-transform">
+          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center z-50 max-w-md mx-auto shadow-[0_-5px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.25)] px-6 py-2 lg:hidden">
+            <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 p-2 active:scale-95 transition-transform">
               <Settings size={22} />
-              <span className="text-[10px] font-bold">تنظیمات</span>
+              <span className="text-[10px] font-bold">{t('settings')}</span>
             </button>
             
             <button onClick={() => { setIsAdding(true); }} className="flex flex-col items-center justify-center -mt-8">
-               <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-4 border-slate-100 shadow-xl shadow-blue-200 active:scale-90 transition-transform">
+               <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-4 border-slate-100 dark:border-slate-950 shadow-xl shadow-blue-200/50 dark:shadow-none active:scale-90 transition-transform">
                   <UserPlus size={28} />
                </div>
-               <span className="text-[10px] font-bold text-slate-500 mt-1">افزودن</span>
+               <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">{t('add')}</span>
             </button>
 
-            <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+            <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}>
               <Home size={22} />
-              <span className="text-[10px] font-bold">خانه</span>
+              <span className="text-[10px] font-bold">{t('home')}</span>
             </button>
           </div>
       </div>

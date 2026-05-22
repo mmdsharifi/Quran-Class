@@ -59,7 +59,7 @@ export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast
   }, []);
 
   return (
-    <button onClick={togglePlay} className={`p-2 rounded-full transition-all ${isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-500'}`}>
+    <button onClick={togglePlay} className={`p-2 rounded-full transition-all ${isPlaying ? 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-500 dark:hover:text-blue-400'}`}>
         {isLoading ? (
             <Loader2 size={18} className="animate-spin text-blue-500" />
         ) : isPlaying ? (

@@ -31,6 +31,34 @@ const App = () => {
 
   const { toasts, modalConfig, addToast, confirmAction } = useFeedback();
 
+  // Dynamic theme resolver
+  React.useEffect(() => {
+    const theme = settings.theme || 'system';
+    const root = document.documentElement;
+
+    const applyTheme = (isDark: boolean) => {
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    };
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      applyTheme(mediaQuery.matches);
+
+      const listener = (e: MediaQueryListEvent) => {
+        applyTheme(e.matches);
+      };
+      
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    } else {
+      applyTheme(theme === 'dark');
+    }
+  }, [settings.theme]);
+
   return (
     <>
       <ToastContainer toasts={toasts} />

@@ -48,17 +48,17 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
   });
 
   // Ranking and ring styles
-  let rankStyle = 'bg-slate-100 text-slate-500';
-  let ringColor = 'border-slate-100';
+  let rankStyle = 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+  let ringColor = 'border-slate-100 dark:border-slate-900';
   if (!isEditMode) {
     if (globalIndex === 0) {
-      rankStyle = 'bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200';
+      rankStyle = 'bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200/50';
       ringColor = 'border-yellow-400';
     } else if (globalIndex === 1) {
-      rankStyle = 'bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200';
+      rankStyle = 'bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200/50';
       ringColor = 'border-slate-300';
     } else if (globalIndex === 2) {
-      rankStyle = 'bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200';
+      rankStyle = 'bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200/50';
       ringColor = 'border-orange-300';
     }
   }
@@ -298,43 +298,43 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               }
             }
           }}
-          className={`w-full flex flex-col bg-white p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${
+          className={`w-full flex flex-col bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${
             isEditMode
-              ? 'border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50'
+              ? 'border-dashed border-slate-300 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20'
               : `${
-                  globalIndex < 3 ? ringColor : 'border-transparent'
-                } hover:border-green-400`
+                  globalIndex < 3 ? ringColor : 'border-transparent dark:border-transparent'
+                } hover:border-green-400 dark:hover:border-green-500`
           }`}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-b-2 shadow-sm transition-all ${
-                  isEditMode ? 'bg-slate-200 text-slate-400 scale-90' : rankStyle
+                  isEditMode ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 scale-90' : rankStyle
                 }`}
               >
                 {isEditMode ? <Edit size={18} /> : globalIndex + 1}
               </div>
-              <div className="text-right">
-                <div className="font-bold text-slate-700 text-sm text-right">
+              <div className="text-start">
+                <div className="font-bold text-slate-700 dark:text-slate-200 text-sm text-start">
                   {student.name}
                 </div>
                 {!isEditMode && (
-                  <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-1 flex flex-wrap items-center gap-2">
                     {timeFilter === 'all' ? (
                       <>
                         {student.diamonds > 0 && (
-                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
                             <span className="text-[10px]">💎</span> {student.diamonds}
                           </span>
                         )}
                         {(student.stars > 0 || student.diamonds > 0) && (
-                          <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
                             <span className="text-[10px]">⭐️</span> {student.stars}
                           </span>
                         )}
                         {student.pluses > 0 && (
-                          <span className="text-green-500 text-[10px] font-bold">
+                          <span className="text-green-500 dark:text-green-400 text-[10px] font-bold">
                             +{student.pluses}
                           </span>
                         )}
@@ -342,36 +342,36 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                     ) : (
                       <>
                         {stats.diamonds > 0 && (
-                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
                             <span className="text-[10px]">💎</span> {stats.diamonds}
                           </span>
                         )}
                         {stats.stars > 0 && (
-                          <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
                             <span className="text-[10px]">⭐️</span> {stats.stars}
                           </span>
                         )}
                         {stats.pluses > 0 && (
-                          <span className="bg-green-50 text-green-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 font-bold">
+                          <span className="bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 dark:border-green-900/40 font-bold">
                             <span className="text-[10px]">+</span>
                             {stats.pluses}
                           </span>
                         )}
 
                         {stats.recitation > 0 || stats.memorization > 0 ? (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                            {stats.recitation > 0 && <span>روخوانی: {stats.recitation}</span>}
+                          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                            {stats.recitation > 0 && <span>{t('recitation')}: {stats.recitation}</span>}
                             {stats.recitation > 0 && stats.memorization > 0 && (
-                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-300 dark:text-slate-700">•</span>
                             )}
-                            {stats.memorization > 0 && <span>حفظ: {stats.memorization}</span>}
+                            {stats.memorization > 0 && <span>{t('memorization')}: {stats.memorization}</span>}
                           </span>
                         ) : (
                           stats.diamonds === 0 &&
                           stats.stars === 0 &&
                           stats.pluses === 0 && (
-                            <span className="text-[10px] text-slate-300 italic">
-                              بدون فعالیت
+                            <span className="text-[10px] text-slate-300 dark:text-slate-600 italic">
+                              {t('noActivity')}
                             </span>
                           )
                         )}
@@ -382,7 +382,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               </div>
             </div>
             {isEditMode ? (
-              <div className="bg-slate-100 p-2 rounded-full text-slate-400">
+              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-400 dark:text-slate-500">
                 <Settings size={16} />
               </div>
             ) : Object.keys(student.memorizationProgress || {}).some(

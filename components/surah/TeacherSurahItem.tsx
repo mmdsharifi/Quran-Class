@@ -88,11 +88,11 @@ const TeacherSurahItemComponent: React.FC<{ surah: Surah, student: Student, mode
                </div>
            )}
            <div className="flex justify-between items-center mb-3">
-             <span className="text-xs font-bold text-slate-500">{mode === 'recitation' ? 'آیات روخوانی:' : 'آیات حفظ:'}</span>
-             <button onClick={(e) => { e.stopPropagation(); handleFullComplete(); }} className={`text-xs px-2 py-1 rounded bg-white border shadow-sm ${themeText} active:scale-95 transition-transform`}>{isFullyCompleted ? 'ثبت مرور مجدد 🔄' : 'تایید کل'}</button>
+             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{mode === 'recitation' ? t('recitationAyahs') : t('memorizationAyahs')}</span>
+             <button onClick={(e) => { e.stopPropagation(); handleFullComplete(); }} className={`text-xs px-2 py-1 rounded bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-sm ${themeText} active:scale-95 transition-transform`}>{isFullyCompleted ? t('reviewAgain') : t('markAll')}</button>
            </div>
            <div className="grid grid-cols-5 gap-2">
-             {ayahsList.map(ayah => (<button key={ayah} onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} className={`aspect-square rounded-lg flex items-center justify-center text-sm font-bold border-b-2 transition-all ${completedAyahs.includes(ayah) ? `${themeBtn} text-white shadow-sm` : 'bg-white text-slate-400 border-slate-200'}`}>{ayah}</button>))}
+             {ayahsList.map(ayah => (<button key={ayah} onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} className={`aspect-square rounded-lg flex items-center justify-center text-sm font-bold border-b-2 transition-all ${completedAyahs.includes(ayah) ? `${themeBtn} text-white shadow-sm` : 'bg-white dark:bg-slate-850 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'}`}>{ayah}</button>))}
            </div>
         </div>
       )}

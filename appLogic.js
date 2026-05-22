@@ -8,6 +8,7 @@ import {
 export const DEFAULT_SETTINGS = Object.freeze({
   rokhvaniDays: [6, 1, 3],
   hefzDays: [0, 2, 4, 5],
+  theme: 'system',
 });
 
 export const loadJsonFromStorage = (storage, key, fallback) => {
