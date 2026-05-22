@@ -2,6 +2,9 @@
 
 **QuClass** is a smart, modern, and interactive application for managing, tracking, and logging educational activities in Quranic classes (recitation, memorization, points, attendance). Designed as a Progressive Web App (PWA) with a stunning glassmorphic UI, it dynamically supports RTL (Farsi) and LTR (English) layouts, as well as Light, Dark, and System themes.
 
+![QuClass Main Interface - English](./docs/screenshot-en.png)
+![QuClass Main Interface - Farsi](./docs/screenshot-fa.png)
+
 [نسخه فارسی راهنما (readme-fa.md)](./readme-fa.md)
 
 ---
