@@ -89,19 +89,35 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                 const parsedStudents: Student[] = dataLines.map(line => {
                     const cols = parseCSVLine(line);
                     if (cols.length < 12) return null;
+
+                    const safeJsonParse = (str: string, fallback: any = {}) => {
+                        try {
+                            return JSON.parse(str || '{}');
+                        } catch (_) {
+                            return fallback;
+                        }
+                    };
+
+                    let lastActionVal = undefined;
+                    if (cols[11] && cols[11] !== 'null') {
+                        try {
+                            lastActionVal = JSON.parse(cols[11]);
+                        } catch (_) {}
+                    }
+
                     return {
-                        id: Number(cols[0]),
+                        id: Number(cols[0]) || Date.now() + Math.floor(Math.random() * 1000),
                         name: cols[1],
-                        diamonds: Number(cols[2]),
-                        stars: Number(cols[3]),
-                        pluses: Number(cols[4]),
+                        diamonds: Number(cols[2]) || 0,
+                        stars: Number(cols[3]) || 0,
+                        pluses: Number(cols[4]) || 0,
                         note: cols[5],
-                        streak: Number(cols[6]),
-                        ayahProgress: JSON.parse(cols[7] || '{}'),
-                        memorizationProgress: JSON.parse(cols[8] || '{}'),
-                        lastReview: JSON.parse(cols[9] || '{}'),
-                        reviewHistory: JSON.parse(cols[10] || '{}'),
-                        lastAction: cols[11] && cols[11] !== 'null' ? JSON.parse(cols[11]) : undefined,
+                        streak: Number(cols[6]) || 0,
+                        ayahProgress: safeJsonParse(cols[7]),
+                        memorizationProgress: safeJsonParse(cols[8]),
+                        lastReview: safeJsonParse(cols[9]),
+                        reviewHistory: safeJsonParse(cols[10]),
+                        lastAction: lastActionVal,
                         completedSurahs: []
                     };
                 }).filter(Boolean) as Student[];
@@ -132,11 +148,11 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
     return (
         <div 
             onClick={onClose}
-            className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            className="fixed inset-0 z-[60] flex items-end lg:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4"
         >
             <div 
                 onClick={(e) => e.stopPropagation()}
-                className="bg-slate-50 w-full max-w-md rounded-t-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto"
+                className="bg-slate-50 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[90vh] lg:max-h-[85vh] overflow-y-auto"
             >
                 <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6"></div>
                 <div className="flex justify-between items-center mb-6">

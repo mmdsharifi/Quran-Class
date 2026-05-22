@@ -10,11 +10,12 @@ export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast
   
   const togglePlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!navigator.onLine) { showToast("برای پخش صوت نیاز به اینترنت است", 'error'); return; }
 
     if (!audioRef.current) {
         const url = getSurahAudioUrl(surahId, AUDIO_BASE_URL);
-        const audio = new Audio(url);
+        const audio = new Audio();
+        audio.crossOrigin = "anonymous";
+        audio.src = url;
         
         audio.addEventListener('ended', () => {
             setIsPlaying(false);

@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 
@@ -29,7 +30,10 @@ const getLastUpdate = () => {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
     __APP_LAST_UPDATE__: JSON.stringify(getLastUpdate()),

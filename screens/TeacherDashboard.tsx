@@ -215,7 +215,7 @@ export const TeacherDashboard = ({
   else if (activeStudentRank === 3) activeRankStyle = "bg-orange-400 text-orange-900 border-orange-500 shadow-orange-500/50";
 
   return (
-    <div className="max-w-md mx-auto h-full flex flex-col relative bg-slate-100 min-h-screen overflow-hidden">
+    <div className="w-full h-full lg:h-screen flex flex-col lg:flex-row relative bg-slate-100 min-h-screen lg:min-h-0 overflow-hidden">
       {/* Settings Sheet */}
       {showSettings && (
           <SettingsSheet 
@@ -281,283 +281,376 @@ export const TeacherDashboard = ({
           />
       )}
 
-      {/* Main Content Area with Transitions */}
-      <div className="flex-1 relative w-full h-full overflow-hidden">
-          {/* List View */}
-          <div className={`absolute inset-0 bg-slate-100 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? '-translate-x-1/4 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}`}>
-              <div className="p-4">
-                  <div className="flex items-center justify-between mb-6 relative">
-                    <button 
-                       onClick={() => setShowClassManagement(true)}
-                       className="flex flex-col items-start text-right p-2 -m-2 rounded-2xl hover:bg-slate-200/50 active:scale-95 transition-all group focus:outline-none"
-                    >
-                       <h2 className="text-xl font-black text-slate-700 flex items-center gap-1.5">
-                         <span>{classEmoji}</span>
-                         <span className="truncate max-w-[180px]">{className}</span>
-                         <ChevronRight size={16} className="text-slate-400 rotate-90 group-hover:text-blue-600 transition-colors" />
-                       </h2>
-                       <div className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1.5">
-                         <span>شاگردان: {students.length} نفر</span>
-                         {activeClass?.startDate && (
-                           <>
-                             <span>•</span>
-                             <span>دوره: {activeClass.startDate} {activeClass.endDate ? `تا ${activeClass.endDate}` : ''}</span>
-                           </>
-                         )}
-                       </div>
-                    </button>
-                    <button 
-                       onClick={() => setIsEditMode(!isEditMode)} 
-                       className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
-                    >
-                       {isEditMode ? <Check size={20} /> : <Edit size={20} />}
-                    </button>
-                  </div>
+      {/* Sidebar (Desktop Only) */}
+      <div className="hidden lg:flex lg:flex-col lg:w-64 xl:w-72 bg-slate-900 text-slate-100 shrink-0 h-screen border-l border-slate-800 p-6 justify-between select-none">
+        <div className="flex flex-col gap-6">
+          {/* Header/Branding */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <BookOpen size={22} />
+            </div>
+            <div>
+              <h1 className="text-base font-black bg-gradient-to-l from-blue-400 to-indigo-300 bg-clip-text text-transparent">کوکلاس | QuClass</h1>
+              <p className="text-[9px] font-bold text-slate-500 tracking-wider">سامانه مدیریت کلاس قرآن</p>
+            </div>
+          </div>
 
-                  <div className="relative mb-6">
-                      {searchQuery ? (
+          {/* Active Class Selector / Switcher */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <span>کلاس‌های فعال</span>
+              <button 
+                onClick={() => setShowClassManagement(true)} 
+                className="text-[10px] text-blue-400 hover:text-blue-300 font-bold bg-blue-500/10 hover:bg-blue-500/20 px-2 py-0.5 rounded transition-colors"
+              >
+                مدیریت
+              </button>
+            </div>
+            
+            <div className="space-y-1 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+              {classes.filter(c => !c.archived).map(c => {
+                const isActive = c.id === activeClassId;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => onSelectClass(c.id)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-right transition-all text-xs font-bold ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+                  >
+                    <span className="text-base">{c.emoji || '🕌'}</span>
+                    <span className="truncate flex-1">{c.name}</span>
+                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="space-y-2 mt-2">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">عملیات سریع</div>
+            <button
+              onClick={() => setIsAdding(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-center transition-all bg-gradient-to-l from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-900/10 text-xs font-bold active:scale-95 cursor-pointer"
+            >
+              <UserPlus size={16} />
+              <span>افزودن شاگرد جدید</span>
+            </button>
+            
+            <button
+              onClick={() => setShowSettings(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-center transition-all bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 text-xs font-bold active:scale-95 cursor-pointer"
+            >
+              <Settings size={16} />
+              <span>تنظیمات و برنامه هفتگی</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer stats */}
+        <div className="bg-slate-800 border border-slate-700/30 rounded-2xl p-4 text-[11px] font-bold text-slate-400 flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <span>شاگردان این کلاس:</span>
+            <span className="text-slate-200">{students.length} نفر</span>
+          </div>
+          {activeClass?.startDate && (
+            <div className="flex justify-between items-center border-t border-slate-700/30 pt-2">
+              <span>بازه زمانی دوره:</span>
+              <span className="text-slate-200 truncate max-w-[120px]">{activeClass.startDate} {activeClass.endDate ? `تا ${activeClass.endDate}` : ''}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col relative w-full h-full overflow-hidden lg:max-w-none lg:mx-0 max-w-md mx-auto">
+          {/* Main Content Area with Transitions */}
+          <div className="flex-1 relative w-full h-full overflow-hidden lg:flex lg:flex-row lg:h-full">
+              {/* List View */}
+              <div className={`absolute inset-0 bg-slate-100 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? '-translate-x-1/4 opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'} lg:relative lg:inset-auto lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:w-[380px] xl:w-[420px] lg:h-full lg:overflow-y-auto lg:pb-6 lg:border-l lg:border-slate-200`}>
+                  <div className="p-4">
+                      <div className="flex items-center justify-between mb-6 relative">
                         <button 
-                          onClick={() => setSearchQuery('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                           onClick={() => setShowClassManagement(true)}
+                           className="flex flex-col items-start text-right p-2 -m-2 rounded-2xl hover:bg-slate-200/50 active:scale-95 transition-all group focus:outline-none"
                         >
-                          <X size={18} />
+                           <h2 className="text-xl font-black text-slate-700 flex items-center gap-1.5">
+                             <span>{classEmoji}</span>
+                             <span className="truncate max-w-[180px]">{className}</span>
+                             <ChevronRight size={16} className="text-slate-400 rotate-90 group-hover:text-blue-600 transition-colors" />
+                           </h2>
+                           <div className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1.5">
+                             <span>شاگردان: {students.length} نفر</span>
+                             {activeClass?.startDate && (
+                               <>
+                                 <span>•</span>
+                                 <span>دوره: {activeClass.startDate} {activeClass.endDate ? `تا ${activeClass.endDate}` : ''}</span>
+                               </>
+                             )}
+                           </div>
                         </button>
-                      ) : (
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                      )}
-                      <input 
-                        ref={searchInputRef}
-                        type="text" 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="جستجوی نام شاگرد..." 
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 pr-10 pl-4 text-slate-700 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all shadow-sm"
-                      />
-                  </div>
+                        <button 
+                           onClick={() => setIsEditMode(!isEditMode)} 
+                           className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'}`}
+                        >
+                           {isEditMode ? <Check size={20} /> : <Edit size={20} />}
+                        </button>
+                      </div>
 
-                  {/* Time Filter Tabs */}
-                  <div className="bg-slate-200/60 backdrop-blur-sm p-1 rounded-2xl flex gap-1 mb-6 text-xs font-bold text-slate-500 relative">
-                    <button
-                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('all'); }}
-                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'all' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
-                    >
-                      کل دوره
-                    </button>
-                    <button
-                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('month'); }}
-                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'month' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
-                    >
-                      این ماه
-                    </button>
-                    <button
-                      onClick={() => { playSound(SFX_CLICK); setTimeFilter('week'); }}
-                      className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'week' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
-                    >
-                      این هفته
-                    </button>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <p className="text-slate-500 text-sm mb-2 flex items-center gap-2 justify-between">
-                       <span className="flex items-center gap-2"><Trophy size={14} className="text-yellow-500"/> {isEditMode ? 'ویرایش شاگردان' : 'رده‌بندی کلاس'}</span>
-                    </p>
-                    {filteredStudents.length === 0 ? (
-                       <div className="text-center py-10 text-slate-400">
-                          <p>شاگردی با این نام پیدا نشد.</p>
-                       </div>
-                    ) : filteredStudents.map((student) => {
-                        const globalIndex = sortedStudents.findIndex(s => s.id === student.id);
-                        const stats = studentStatsMap.get(student.id) || { recitation: 0, memorization: 0, diamonds: 0, stars: 0, pluses: 0 };
-                        return (
-                          <StudentListItem
-                            key={student.id}
-                            student={student}
-                            globalIndex={globalIndex}
-                            stats={stats}
-                            isEditMode={isEditMode}
-                            timeFilter={timeFilter}
-                            activeStudentId={activeStudentId}
-                            onSelect={onSelectStudent}
-                            onEdit={setEditingStudent}
-                            onManualPoint={handleLocalManualPoint}
+                      <div className="relative mb-6">
+                          {searchQuery ? (
+                            <button 
+                              onClick={() => setSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                            >
+                              <X size={18} />
+                            </button>
+                          ) : (
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                          )}
+                          <input 
+                            ref={searchInputRef}
+                            type="text" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="جستجوی نام شاگرد..." 
+                            className="w-full bg-white border border-slate-200 rounded-xl py-3 pr-10 pl-4 text-slate-700 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all shadow-sm"
                           />
-                        );
-                    })}
+                      </div>
+
+                      {/* Time Filter Tabs */}
+                      <div className="bg-slate-200/60 backdrop-blur-sm p-1 rounded-2xl flex gap-1 mb-6 text-xs font-bold text-slate-500 relative">
+                        <button
+                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('all'); }}
+                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'all' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                        >
+                          کل دوره
+                        </button>
+                        <button
+                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('month'); }}
+                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'month' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                        >
+                          این ماه
+                        </button>
+                        <button
+                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('week'); }}
+                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'week' ? 'bg-white text-slate-800 shadow-sm font-black' : 'hover:text-slate-700 active:scale-95'}`}
+                        >
+                          این هفته
+                        </button>
+                      </div>
+
+                      <div className="grid gap-3">
+                        <p className="text-slate-500 text-sm mb-2 flex items-center gap-2 justify-between">
+                           <span className="flex items-center gap-2"><Trophy size={14} className="text-yellow-500"/> {isEditMode ? 'ویرایش شاگردان' : 'رده‌بندی کلاس'}</span>
+                        </p>
+                        {filteredStudents.length === 0 ? (
+                           <div className="text-center py-10 text-slate-400">
+                              <p>شاگردی با این نام پیدا نشد.</p>
+                           </div>
+                        ) : filteredStudents.map((student) => {
+                            const globalIndex = sortedStudents.findIndex(s => s.id === student.id);
+                            const stats = studentStatsMap.get(student.id) || { recitation: 0, memorization: 0, diamonds: 0, stars: 0, pluses: 0 };
+                            return (
+                              <StudentListItem
+                                key={student.id}
+                                student={student}
+                                globalIndex={globalIndex}
+                                stats={stats}
+                                isEditMode={isEditMode}
+                                timeFilter={timeFilter}
+                                activeStudentId={activeStudentId}
+                                onSelect={onSelectStudent}
+                                onEdit={setEditingStudent}
+                                onManualPoint={handleLocalManualPoint}
+                              />
+                            );
+                        })}
+                      </div>
                   </div>
+              </div>
+
+              {/* Detail View */}
+              <div 
+                 ref={detailContainerRef}
+                 className={`absolute inset-0 bg-slate-100 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? 'translate-x-0' : 'translate-x-full'} lg:relative lg:inset-auto lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto lg:flex-1 lg:h-full lg:pb-0`}
+              >
+                  {activeStudent ? (
+                      <div className="pb-4">
+                          {/* Sticky Header */}
+                          <div className={`flex items-center justify-between sticky top-0 z-30 py-3 px-4 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200' : 'bg-slate-100'}`}>
+                             <div className="flex items-center gap-3 overflow-hidden">
+                                 <button 
+                                    onClick={() => { playSound(SFX_CLICK); onSelectStudent(null); }} 
+                                    className={`flex items-center gap-1 font-bold text-sm bg-white shadow-sm border border-slate-200 hover:text-slate-700 transition-all z-20 overflow-hidden lg:hidden ${isScrolled ? 'text-slate-700 p-2 rounded-full w-9 justify-center' : 'text-slate-500 px-3 py-2 rounded-xl w-24'}`}
+                                 >
+                                    <ArrowRight size={16} className="shrink-0" /> 
+                                    <span className={`whitespace-nowrap transition-all duration-300 ${isScrolled ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>لیست</span>
+                                 </button>
+
+                                 {/* Scrolled Name/Score Display (Aligned Right) */}
+                                 <div className={`flex flex-col items-start transition-all duration-500 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
+                                     <span className="font-bold text-slate-700 text-sm truncate max-w-[140px]">{activeStudent.name}</span>
+                                     <div className="flex gap-2 text-[10px]">
+                                        {activeStudent.diamonds > 0 && <span className="text-blue-500 font-bold">💎 {activeStudent.diamonds}</span>}
+                                        {activeStudent.stars > 0 && <span className="text-yellow-500 font-bold">⭐️ {activeStudent.stars}</span>}
+                                        <span className="text-green-500 font-bold">+{activeStudent.pluses}</span>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             <div className="flex items-center gap-2 z-20 shrink-0">
+                                <button onClick={goToPrevStudent} disabled={activeStudentIndex === 0} className={`p-2 rounded-xl border ${activeStudentIndex === 0 ? 'bg-slate-200 text-slate-300 border-transparent' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`}><ChevronRight size={20}/></button>
+                                <span className={`text-xs font-bold transition-colors ${isScrolled ? 'text-slate-400' : 'text-slate-400'}`}>{activeStudentIndex + 1} / {students.length}</span>
+                                <button onClick={goToNextStudent} disabled={activeStudentIndex === sortedStudents.length - 1} className={`p-2 rounded-xl border ${activeStudentIndex === sortedStudents.length - 1 ? 'bg-slate-200 text-slate-300 border-transparent' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`}><ChevronLeft size={20}/></button>
+                             </div>
+                          </div>
+                          
+                          <div className="px-4">
+                            <div className="bg-slate-800 text-white p-4 rounded-2xl mb-6 shadow-lg relative overflow-hidden group">
+                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                                 
+                                <div className="flex justify-between items-start mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black border-2 shadow-lg ${activeRankStyle}`}>{activeStudentRank}</div>
+                                    <button onClick={() => setEditingStudent(activeStudent)} className="text-right group/edit focus:outline-none">
+                                      <h3 className="text-xl font-bold flex items-center gap-2">
+                                          {activeStudent.name}
+                                          <div className="bg-white/10 p-1 rounded-full opacity-50 group-hover/edit:opacity-100 transition-all">
+                                            <Edit size={12} />
+                                          </div>
+                                      </h3>
+                                      <div className="flex gap-2 text-xs text-slate-300 mt-1">
+                                         <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">💎</span> {activeStudent.diamonds}</span>
+                                         <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">⭐️</span> {activeStudent.stars}</span>
+                                      </div>
+                                    </button>
+                                  </div>
+                                  <div className="text-center mr-8">
+                                     <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-1">{activeStudent.streak} <Flame size={20} className="fill-current" /></div>
+                                     <div className="text-[10px] text-slate-400">زنجیره</div>
+                                  </div>
+                                </div>
+                                
+                                {/* Edit Note Button */}
+                                {activeStudent.note && (
+                                    <button 
+                                        onClick={() => setEditingStudent(activeStudent)}
+                                        className="w-full mb-4 bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg text-xs text-slate-300 flex items-center gap-2 text-right transition-colors group/note"
+                                    >
+                                        <StickyNote size={12} className="shrink-0" />
+                                        <span className="flex-1 truncate">{activeStudent.note}</span>
+                                        <Edit size={10} className="opacity-0 group-hover/note:opacity-50" />
+                                    </button>
+                                )}
+
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-xs text-slate-400 mb-1"><span>امتیاز مثبت</span><span>{activeStudent.pluses}/5</span></div>
+                                    <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div className="bg-green-400 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 mt-4">
+                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsUp size={16} /> تشویق</button>
+                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-red-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsDown size={16} /> تذکر</button>
+                                </div>
+                                {activeStudent.lastAction && (<div className="bg-slate-900/50 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} /></div>)}
+                            </div>
+
+                            {/* Progress Report Card */}
+                            {activeStudent && weekStats && monthStats && allStats && (
+                              <div className="bg-white p-4 rounded-2xl mb-6 shadow-sm border border-slate-200/80 text-right">
+                                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                  <Trophy size={16} className="text-yellow-500 shrink-0" />
+                                  <span>گزارش پیشرفت ({activeStudent.name})</span>
+                                </h4>
+                                
+                                <div className="grid grid-cols-4 gap-2 text-center text-[11px] dir-rtl">
+                                  {/* Headers */}
+                                  <div className="text-right text-slate-400 font-medium py-1">دوره</div>
+                                  <div className="text-slate-400 font-medium py-1">روخوانی</div>
+                                  <div className="text-slate-400 font-medium py-1">حفظ</div>
+                                  <div className="text-slate-400 font-medium py-1 font-bold">امتیازات</div>
+                                  
+                                  {/* Week Row */}
+                                  <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این هفته</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.recitation} آیه</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.memorization} آیه</div>
+                                  <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                    {weekStats.diamonds > 0 && <span>💎{weekStats.diamonds}</span>}
+                                    {weekStats.stars > 0 && <span>⭐️{weekStats.stars}</span>}
+                                    {weekStats.pluses > 0 && <span className="text-green-500 font-bold">+{weekStats.pluses}</span>}
+                                    {weekStats.diamonds === 0 && weekStats.stars === 0 && weekStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                                  </div>
+                                  
+                                  {/* Month Row */}
+                                  <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این ماه</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.recitation} آیه</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.memorization} آیه</div>
+                                  <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                    {monthStats.diamonds > 0 && <span>💎{monthStats.diamonds}</span>}
+                                    {monthStats.stars > 0 && <span>⭐️{monthStats.stars}</span>}
+                                    {monthStats.pluses > 0 && <span className="text-green-500 font-bold">+{monthStats.pluses}</span>}
+                                    {monthStats.diamonds === 0 && monthStats.stars === 0 && monthStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                                  </div>
+                                  
+                                  {/* All Time Row */}
+                                  <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">کل دوره</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.recitation} آیه</div>
+                                  <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.memorization} آیه</div>
+                                  <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
+                                    {allStats.diamonds > 0 && <span>💎{allStats.diamonds}</span>}
+                                    {allStats.stars > 0 && <span>⭐️{allStats.stars}</span>}
+                                    {allStats.pluses > 0 && <span className="text-green-500 font-bold">+{allStats.pluses}</span>}
+                                    {allStats.diamonds === 0 && allStats.stars === 0 && allStats.pluses === 0 && <span className="text-slate-300">-</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="sticky top-[60px] z-20 bg-slate-100/90 backdrop-blur-md py-2 -mx-4 px-4 mb-4 border-b border-slate-200/40">
+                                <div className="bg-slate-200 p-1 rounded-xl flex">
+                                    <button onClick={() => setMode('recitation')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'recitation' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><BookOpen size={18} /> روخوانی</button>
+                                    <button onClick={() => setMode('memorization')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'memorization' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><Brain size={18} /> حفظ</button>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                 {SURAHS.map((surah) => <TeacherSurahItem key={surah.id} surah={surah} student={activeStudent} mode={mode} onUpdateProgress={onUpdateProgress} showToast={showToast} />)}
+                            </div>
+                          </div>
+                      </div>
+                  ) : (
+                      /* Desktop details placeholder */
+                      <div className="hidden lg:flex flex-col items-center justify-center h-full text-slate-400 p-8 text-center bg-slate-50">
+                        <div className="w-20 h-20 bg-blue-50 text-blue-500/80 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-blue-100">
+                          <BookOpen size={40} className="animate-bounce-slow text-blue-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-700 mb-2">جزئیات پیشرفت شاگرد</h3>
+                        <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
+                          یک شاگرد را از لیست رده‌بندی انتخاب کنید تا جزئیات حضور، فعالیت، جوایز و وضعیت حفظ و روخوانی او را مشاهده و مدیریت کنید.
+                        </p>
+                      </div>
+                  )}
               </div>
           </div>
 
-          {/* Detail View */}
-          <div 
-             ref={detailContainerRef}
-             className={`absolute inset-0 bg-slate-100 overflow-y-auto pb-24 transition-transform duration-300 ease-in-out ${activeStudentId ? 'translate-x-0' : 'translate-x-full'}`}
-          >
-              {activeStudent && (
-                  <div className="pb-4">
-                      {/* Sticky Header */}
-                      <div className={`flex items-center justify-between sticky top-0 z-30 py-3 px-4 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200' : 'bg-slate-100'}`}>
-                         <div className="flex items-center gap-3 overflow-hidden">
-                             <button 
-                                onClick={() => { playSound(SFX_CLICK); onSelectStudent(null); }} 
-                                className={`flex items-center gap-1 font-bold text-sm bg-white shadow-sm border border-slate-200 hover:text-slate-700 transition-all z-20 overflow-hidden ${isScrolled ? 'text-slate-700 p-2 rounded-full w-9 justify-center' : 'text-slate-500 px-3 py-2 rounded-xl w-24'}`}
-                             >
-                                <ArrowRight size={16} className="shrink-0" /> 
-                                <span className={`whitespace-nowrap transition-all duration-300 ${isScrolled ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>لیست</span>
-                             </button>
+          {/* Persistent Bottom Navigation */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-between items-center z-50 max-w-md mx-auto shadow-[0_-5px_20px_rgba(0,0,0,0.05)] px-6 py-2 lg:hidden">
+            <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-400 hover:text-blue-600 p-2 active:scale-95 transition-transform">
+              <Settings size={22} />
+              <span className="text-[10px] font-bold">تنظیمات</span>
+            </button>
+            
+            <button onClick={() => { setIsAdding(true); }} className="flex flex-col items-center justify-center -mt-8">
+               <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-4 border-slate-100 shadow-xl shadow-blue-200 active:scale-90 transition-transform">
+                  <UserPlus size={28} />
+               </div>
+               <span className="text-[10px] font-bold text-slate-500 mt-1">افزودن</span>
+            </button>
 
-                             {/* Scrolled Name/Score Display (Aligned Right) */}
-                             <div className={`flex flex-col items-start transition-all duration-500 ${isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}`}>
-                                 <span className="font-bold text-slate-700 text-sm truncate max-w-[140px]">{activeStudent.name}</span>
-                                 <div className="flex gap-2 text-[10px]">
-                                    {activeStudent.diamonds > 0 && <span className="text-blue-500 font-bold">💎 {activeStudent.diamonds}</span>}
-                                    {activeStudent.stars > 0 && <span className="text-yellow-500 font-bold">⭐️ {activeStudent.stars}</span>}
-                                    <span className="text-green-500 font-bold">+{activeStudent.pluses}</span>
-                                 </div>
-                             </div>
-                         </div>
-
-                         <div className="flex items-center gap-2 z-20 shrink-0">
-                            <button onClick={goToPrevStudent} disabled={activeStudentIndex === 0} className={`p-2 rounded-xl border ${activeStudentIndex === 0 ? 'bg-slate-200 text-slate-300 border-transparent' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`}><ChevronRight size={20}/></button>
-                            <span className={`text-xs font-bold transition-colors ${isScrolled ? 'text-slate-400' : 'text-slate-400'}`}>{activeStudentIndex + 1} / {students.length}</span>
-                            <button onClick={goToNextStudent} disabled={activeStudentIndex === sortedStudents.length - 1} className={`p-2 rounded-xl border ${activeStudentIndex === sortedStudents.length - 1 ? 'bg-slate-200 text-slate-300 border-transparent' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`}><ChevronLeft size={20}/></button>
-                         </div>
-                      </div>
-                      
-                      <div className="px-4">
-                        <div className="bg-slate-800 text-white p-4 rounded-2xl mb-6 shadow-lg relative overflow-hidden group">
-                             <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                             
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black border-2 shadow-lg ${activeRankStyle}`}>{activeStudentRank}</div>
-                                <button onClick={() => setEditingStudent(activeStudent)} className="text-right group/edit focus:outline-none">
-                                  <h3 className="text-xl font-bold flex items-center gap-2">
-                                      {activeStudent.name}
-                                      <div className="bg-white/10 p-1 rounded-full opacity-50 group-hover/edit:opacity-100 transition-all">
-                                        <Edit size={12} />
-                                      </div>
-                                  </h3>
-                                  <div className="flex gap-2 text-xs text-slate-300 mt-1">
-                                     <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">💎</span> {activeStudent.diamonds}</span>
-                                     <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">⭐️</span> {activeStudent.stars}</span>
-                                  </div>
-                                </button>
-                              </div>
-                              <div className="text-center mr-8">
-                                 <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-1">{activeStudent.streak} <Flame size={20} className="fill-current" /></div>
-                                 <div className="text-[10px] text-slate-400">زنجیره</div>
-                              </div>
-                            </div>
-                            
-                            {/* Edit Note Button */}
-                            {activeStudent.note && (
-                                <button 
-                                    onClick={() => setEditingStudent(activeStudent)}
-                                    className="w-full mb-4 bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg text-xs text-slate-300 flex items-center gap-2 text-right transition-colors group/note"
-                                >
-                                    <StickyNote size={12} className="shrink-0" />
-                                    <span className="flex-1 truncate">{activeStudent.note}</span>
-                                    <Edit size={10} className="opacity-0 group-hover/note:opacity-50" />
-                                </button>
-                            )}
-
-                            <div className="mb-4">
-                                <div className="flex justify-between text-xs text-slate-400 mb-1"><span>امتیاز مثبت</span><span>{activeStudent.pluses}/5</span></div>
-                                <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div className="bg-green-400 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3 mt-4">
-                                <button onClick={() => handleLocalManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsUp size={16} /> تشویق</button>
-                                <button onClick={() => handleLocalManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-red-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsDown size={16} /> تذکر</button>
-                            </div>
-                            {activeStudent.lastAction && (<div className="bg-slate-900/50 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} /></div>)}
-                        </div>
-
-                        {/* Progress Report Card */}
-                        {activeStudent && weekStats && monthStats && allStats && (
-                          <div className="bg-white p-4 rounded-2xl mb-6 shadow-sm border border-slate-200/80 text-right">
-                            <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                              <Trophy size={16} className="text-yellow-500 shrink-0" />
-                              <span>گزارش پیشرفت ({activeStudent.name})</span>
-                            </h4>
-                            
-                            <div className="grid grid-cols-4 gap-2 text-center text-[11px] dir-rtl">
-                              {/* Headers */}
-                              <div className="text-right text-slate-400 font-medium py-1">دوره</div>
-                              <div className="text-slate-400 font-medium py-1">روخوانی</div>
-                              <div className="text-slate-400 font-medium py-1">حفظ</div>
-                              <div className="text-slate-400 font-medium py-1 font-bold">امتیازات</div>
-                              
-                              {/* Week Row */}
-                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این هفته</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.recitation} آیه</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{weekStats.memorization} آیه</div>
-                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
-                                {weekStats.diamonds > 0 && <span>💎{weekStats.diamonds}</span>}
-                                {weekStats.stars > 0 && <span>⭐️{weekStats.stars}</span>}
-                                {weekStats.pluses > 0 && <span className="text-green-500 font-bold">+{weekStats.pluses}</span>}
-                                {weekStats.diamonds === 0 && weekStats.stars === 0 && weekStats.pluses === 0 && <span className="text-slate-300">-</span>}
-                              </div>
-                              
-                              {/* Month Row */}
-                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">این ماه</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.recitation} آیه</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{monthStats.memorization} آیه</div>
-                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
-                                {monthStats.diamonds > 0 && <span>💎{monthStats.diamonds}</span>}
-                                {monthStats.stars > 0 && <span>⭐️{monthStats.stars}</span>}
-                                {monthStats.pluses > 0 && <span className="text-green-500 font-bold">+{monthStats.pluses}</span>}
-                                {monthStats.diamonds === 0 && monthStats.stars === 0 && monthStats.pluses === 0 && <span className="text-slate-300">-</span>}
-                              </div>
-                              
-                              {/* All Time Row */}
-                              <div className="text-right text-slate-600 font-bold py-2 border-t border-slate-100 flex items-center">کل دوره</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.recitation} آیه</div>
-                              <div className="text-slate-700 py-2 border-t border-slate-100 font-semibold">{allStats.memorization} آیه</div>
-                              <div className="py-2 border-t border-slate-100 flex justify-center gap-1 items-center flex-wrap">
-                                {allStats.diamonds > 0 && <span>💎{allStats.diamonds}</span>}
-                                {allStats.stars > 0 && <span>⭐️{allStats.stars}</span>}
-                                {allStats.pluses > 0 && <span className="text-green-500 font-bold">+{allStats.pluses}</span>}
-                                {allStats.diamonds === 0 && allStats.stars === 0 && allStats.pluses === 0 && <span className="text-slate-300">-</span>}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="sticky top-[60px] z-20 bg-slate-100/90 backdrop-blur-md py-2 -mx-4 px-4 mb-4 border-b border-slate-200/40">
-                            <div className="bg-slate-200 p-1 rounded-xl flex">
-                                <button onClick={() => setMode('recitation')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'recitation' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><BookOpen size={18} /> روخوانی</button>
-                                <button onClick={() => setMode('memorization')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'memorization' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><Brain size={18} /> حفظ</button>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                             {SURAHS.map((surah) => <TeacherSurahItem key={surah.id} surah={surah} student={activeStudent} mode={mode} onUpdateProgress={onUpdateProgress} showToast={showToast} />)}
-                        </div>
-                      </div>
-                  </div>
-              )}
+            <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <Home size={22} />
+              <span className="text-[10px] font-bold">خانه</span>
+            </button>
           </div>
       </div>
-
-      {/* Persistent Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-between items-center z-50 max-w-md mx-auto shadow-[0_-5px_20px_rgba(0,0,0,0.05)] px-6 py-2">
-        <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-400 hover:text-blue-600 p-2 active:scale-95 transition-transform">
-          <Settings size={22} />
-          <span className="text-[10px] font-bold">تنظیمات</span>
-        </button>
-        
-        <button onClick={() => { setIsAdding(true); }} className="flex flex-col items-center justify-center -mt-8">
-           <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-4 border-slate-100 shadow-xl shadow-blue-200 active:scale-90 transition-transform">
-              <UserPlus size={28} />
-           </div>
-           <span className="text-[10px] font-bold text-slate-500 mt-1">افزودن</span>
-        </button>
-
-        <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <Home size={22} />
-          <span className="text-[10px] font-bold">خانه</span>
-        </button>
-      </div>
-
     </div>
   );
 };

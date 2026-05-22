@@ -156,11 +156,11 @@ export const ClassManagementSheet = ({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[60] flex items-end lg:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-4"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-slate-50 w-full max-w-md rounded-t-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom duration-300 max-h-[92vh] overflow-y-auto"
+        className="bg-slate-50 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[92vh] lg:max-h-[85vh] overflow-y-auto"
       >
         <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6"></div>
         

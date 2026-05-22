@@ -117,3 +117,41 @@ test("streak increments when required days stay intact between actions", () => {
   });
   assert.equal(result, 3);
 });
+
+test("streak resets to 0 on optional day when a required day was missed", () => {
+  const sunday = new Date("2025-01-05T08:00:00Z").getTime();
+  const tuesday = new Date("2025-01-07T08:00:00Z").getTime();
+  const result = updateStreakAfterPositive({
+    currentStreak: 2,
+    lastActionTimestamp: sunday,
+    now: tuesday,
+    requiredDays: [1, 3], // Monday (1) is required and was missed
+  });
+  assert.equal(result, 0);
+});
+
+test("streak does not get masked by optional day action after missed required day", () => {
+  const sunday = new Date("2025-01-05T08:00:00Z").getTime();
+  const tuesday = new Date("2025-01-07T08:00:00Z").getTime();
+  const wednesday = new Date("2025-01-08T08:00:00Z").getTime();
+  const requiredDays = [1, 3]; // Monday (1) and Wednesday (3) required
+
+  // 1. Tuesday action (optional day)
+  const streakAfterTuesday = updateStreakAfterPositive({
+    currentStreak: 2,
+    lastActionTimestamp: sunday,
+    now: tuesday,
+    requiredDays,
+  });
+  assert.equal(streakAfterTuesday, 0); // resets because Monday was missed
+
+  // 2. Wednesday action (required day)
+  const streakAfterWednesday = updateStreakAfterPositive({
+    currentStreak: streakAfterTuesday, // 0
+    lastActionTimestamp: tuesday,
+    now: wednesday,
+    requiredDays,
+  });
+  assert.equal(streakAfterWednesday, 1); // starts a new streak of 1 instead of continuing the old one
+});
+
