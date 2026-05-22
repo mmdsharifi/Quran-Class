@@ -33,7 +33,8 @@
 * Stream audio recitations online or offline to facilitate student pronunciation and practice.
 
 ### 6. PWA & Offline Support
-* Responsive, mobile-first design that can be installed directly onto your device's home screen.
+* **100% Lighthouse PWA Score:** Fully audited and optimized to achieve a 100% PWA compliance score.
+* Responsive, mobile-first design that can be installed directly onto your device's home screen with modern splash screens and maskable icons.
 * Dedicated **Service Worker** caching assets, audio streams, styles, Google Fonts, and external libraries to enable seamless offline usage.
 
 ### 7. Dual-Language & Theme Support

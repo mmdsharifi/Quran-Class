@@ -51,10 +51,10 @@ QuClass is designed to simplify the management of Quran classes by providing:
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **React 19.2.3** - Modern React with latest features
+- **React 19** - Modern React with latest features
 - **TypeScript** - Type-safe development
 - **Vite** - Fast development and build tool
-- **Tailwind CSS** - Utility-first CSS framework (via CDN/style tags)
+- **Tailwind CSS v4** - Configured via `@tailwindcss/vite` for optimized builds
 
 ### Data Management
 - **LocalStorage** - Client-side persistence for student data and settings
@@ -68,28 +68,55 @@ QuClass is designed to simplify the management of Quran classes by providing:
 
 ```
 QuClass/
-├── App.tsx              # Main application component (773 lines)
-├── constants.ts         # Application constants and data
-├── types.ts             # TypeScript type definitions
-├── index.html           # HTML entry point
-├── index.tsx            # React application entry point
-├── package.json         # Dependencies and scripts
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite build configuration
-├── .gitignore          # Git ignore rules
-└── README.md           # This documentation
+├── components/          # Reusable UI components
+│   ├── class/           # Class management components
+│   ├── common/          # Layout & generic components
+│   ├── settings/        # Settings selection & picker sheets
+│   ├── student/         # Student directory, import, and detail sheets
+│   └── surah/           # Surah audio, progress, and Quran views
+├── screens/             # Main dashboard and app screens
+│   └── TeacherDashboard.tsx
+├── hooks/               # Custom state hooks
+│   ├── useClassData.ts
+│   └── useFeedback.ts
+├── utils/               # Helper utilities
+│   └── helpers.ts
+├── public/              # Static assets (icons, manifest, service worker)
+│   ├── manifest.json
+│   ├── sw.js
+│   ├── icon.svg
+│   ├── icon-192.png
+│   └── icon-512.png
+├── App.tsx              # Main entry layout and context setup
+├── index.html           # HTML template
+├── index.tsx            # Main application mounting and SW registration
+├── translations.ts      # Multi-language dictionary and translation helper
+├── constants.ts         # Quran data and constants
+├── types.ts             # TypeScript definitions
+├── appLogic.js          # Core business/state logic
+├── package.json         # Build dependencies and commands
+└── tsconfig.json        # TypeScript configuration
 ```
 
 ## 🎨 Core Components
 
-### Main Application (`App.tsx`)
-The heart of the application containing:
-- **TeacherDashboard**: Main interface with list and detail views
-- **StudentFormSheet**: Modal for adding/editing students
-- **SettingsSheet**: Configuration for class schedules
-- **TeacherSurahItem**: Individual surah progress tracking
-- **AudioPlayer**: Integrated Quran audio playback
-- **StatsHeader**: Student achievement display
+### Main Dashboard (`screens/TeacherDashboard.tsx`)
+The main dashboard containing:
+- Split panel layout with an active sidebar (only the student details panel scrolls).
+- Leaderboard standings and student honor charts.
+- Dynamic filtering tabs (Weekly, Monthly, Overall progress).
+- Class archiving/restore control options.
+
+### Modular Components (`components/`)
+- **`class/ClassManagementSheet.tsx`**: Management form sheet to create/edit classes, choose theme colors, or assign class emojis.
+- **`settings/SettingsSheet.tsx`**: System configuration toggle for Light, Dark, or System mode theme, and Persian/English language segmented selectors.
+- **`student/`**:
+  - `StudentListItem.tsx`: Student entry row showcasing points, active streaks 🔥, and memory health indicators.
+  - `StudentFormSheet.tsx`: Sheet to add/edit student name and teacher notes.
+  - `ImportStudentSheet.tsx`: Multi-student migration component with collision avoidance and historical records options.
+- **`surah/`**:
+  - `TeacherSurahItem.tsx`: Verse progress grid with bulk validation buttons.
+  - `AudioPlayer.tsx`: Stream player supporting local/offline cached MP3 playback.
 
 ### Data Models (`types.ts`)
 ```typescript
@@ -238,14 +265,12 @@ GEMINI_API_KEY=your_api_key_here
 
 ### Potential Features
 - **Cloud Sync**: Multi-device synchronization
-- **Analytics Dashboard**: Detailed class statistics
+- **Analytics Dashboard**: Additional classroom activity statistics
 - **Parent Portal**: Student progress viewing for parents
 - **Advanced Scheduling**: Holiday and exception handling
 - **Export Features**: PDF reports and data export
-- **Multi-Language**: Arabic, English, and Persian support
 
 ### Technical Improvements
-- **PWA Support**: Offline functionality
 - **Database Integration**: Backend API for scalability
 - **Real-time Updates**: WebSocket support for live tracking
 - **Accessibility**: Enhanced screen reader support
@@ -256,4 +281,4 @@ This project is private and intended for educational use in Quran class manageme
 
 ---
 
-**Note**: This application is designed specifically for Persian/Arabic-speaking users managing Quran memorization classes. The interface and documentation are primarily in Persian to serve the target audience effectively.
+**Note**: This application supports both Farsi (RTL) and English (LTR) language modes with automated layout alignment mirroring, serving both Persian/Arabic-speaking and English-speaking users.
