@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test *.test.mjs",
-    "test:coverage": "node --test --experimental-test-coverage *.test.mjs"
+    "test": "node --experimental-strip-types --test *.test.mjs",
+    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage *.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
