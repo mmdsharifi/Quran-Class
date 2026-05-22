@@ -55,7 +55,7 @@ export const StudentFormSheet = ({
           <button
             type="button"
             onClick={onOpenImport}
-            className="w-full bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold py-3.5 rounded-xl border border-blue-200 dark:border-blue-800/40 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 text-sm"
+            className="w-full bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold py-3.5 rounded-xl border border-blue-200 dark:border-blue-800 active:scale-95 transition-all flex items-center justify-center gap-2 mb-4 text-sm"
           >
             {t('importFromOtherClassBtn')}
           </button>
@@ -114,7 +114,7 @@ export const StudentFormSheet = ({
                         onDelete(student.id);
                         showToast(t('studentDeleted'), 'success');
                     }, true);
-                }} className="w-full bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400 font-bold py-3 rounded-xl border border-red-200 dark:border-red-900/35 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-2">
+                }} className="w-full bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400 font-bold py-3 rounded-xl border border-red-200 dark:border-red-900 active:scale-95 transition-transform flex items-center justify-center gap-2 mt-2">
                    <Trash2 size={18} /> {t('deleteStudent')}
                 </button>
              )}

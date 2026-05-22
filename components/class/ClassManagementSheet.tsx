@@ -202,7 +202,7 @@ export const ClassManagementSheet = ({
                     return (
                       <div
                         key={c.id}
-                        className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-blue-200 dark:border-blue-900/45 shadow-sm flex flex-col gap-3"
+                        className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-blue-200 dark:border-blue-900 shadow-sm flex flex-col gap-3"
                       >
                         <div className="grid grid-cols-4 gap-2">
                           <div className="col-span-3">

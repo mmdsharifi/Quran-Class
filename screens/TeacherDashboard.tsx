@@ -3,6 +3,7 @@ import { Plus, BookOpen, ChevronRight, ChevronLeft, Check, Flame, ArrowRight, Ar
 import { SURAHS, SFX_CLICK, SFX_SUCCESS, SFX_NEGATIVE } from '../constants';
 import { Student, AppSettings, QuranClass } from '../types';
 import { calculateMemoryHealth, playSound, getPraiseText, getWarningText } from '../utils/helpers';
+import { setupSwipeBack } from '../utils/swipe';
 import { TimeAgo } from '../components/common/TimeAgo';
 import { SettingsSheet } from '../components/settings/SettingsSheet';
 import { StudentFormSheet } from '../components/student/StudentFormSheet';
@@ -214,10 +215,10 @@ export const TeacherDashboard = ({
   const filteredStudents = sortedStudents.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.name.includes(searchQuery));
   const activeStudentRank = activeStudentIndex !== -1 ? activeStudentIndex + 1 : 0;
   
-  let activeRankStyle = "bg-slate-600 text-slate-200 border-slate-500";
-  if (activeStudentRank === 1) activeRankStyle = "bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-500/50";
-  else if (activeStudentRank === 2) activeRankStyle = "bg-slate-300 text-slate-900 border-slate-400 shadow-slate-500/50";
-  else if (activeStudentRank === 3) activeRankStyle = "bg-orange-400 text-orange-900 border-orange-500 shadow-orange-500/50";
+  let activeRankStyle = "bg-slate-750 text-slate-350 shadow-inner";
+  if (activeStudentRank === 1) activeRankStyle = "bg-amber-400 text-amber-950 shadow-md shadow-amber-500/20";
+  else if (activeStudentRank === 2) activeRankStyle = "bg-slate-350 text-slate-900 shadow-md shadow-slate-400/20";
+  else if (activeStudentRank === 3) activeRankStyle = "bg-amber-600 text-amber-50 shadow-md shadow-amber-700/20";
 
   return (
     <div className="w-full h-full lg:h-screen flex flex-col lg:flex-row relative bg-slate-100 dark:bg-slate-950 min-h-screen lg:min-h-0 overflow-hidden">
@@ -322,7 +323,7 @@ export const TeacherDashboard = ({
                   <button
                     key={c.id}
                     onClick={() => onSelectClass(c.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-start transition-all text-xs font-bold ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' : 'hover:bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-2xl text-start transition-all duration-75 text-xs font-bold border-x border-t border-b-[4px] ${isActive ? 'bg-blue-600 border-blue-500 border-b-blue-800 text-white shadow-md active:translate-y-[2px] active:border-b-0' : 'bg-transparent border-transparent text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                   >
                     <span className="text-base">{c.emoji || '🕌'}</span>
                     <span className="truncate flex-1">{c.name}</span>
@@ -338,7 +339,7 @@ export const TeacherDashboard = ({
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('quickActions')}</div>
             <button
               onClick={() => setIsAdding(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-center transition-all bg-gradient-to-r rtl:bg-gradient-to-l from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-900/10 text-xs font-bold active:scale-95 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-center transition-all duration-75 bg-blue-600 hover:bg-blue-500 text-white border-b-[4px] border-blue-800 active:border-b-0 active:translate-y-[4px] text-xs font-bold cursor-pointer"
             >
               <UserPlus size={16} />
               <span>{t('addNewStudent')}</span>
@@ -346,7 +347,7 @@ export const TeacherDashboard = ({
             
             <button
               onClick={() => setShowSettings(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-center transition-all bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 text-xs font-bold active:scale-95 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-center transition-all duration-75 bg-slate-800 hover:bg-slate-700 text-slate-350 hover:text-slate-200 border-x border-t border-slate-700 border-b-[4px] border-b-slate-950 active:border-b-0 active:translate-y-[4px] text-xs font-bold cursor-pointer"
             >
               <Settings size={16} />
               <span>{t('settingsAndSchedule')}</span>
@@ -355,13 +356,13 @@ export const TeacherDashboard = ({
         </div>
 
         {/* Footer stats */}
-        <div className="bg-slate-800 border border-slate-700/30 rounded-2xl p-4 text-[11px] font-bold text-slate-300 flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <span>{t('classStudentsCount')}</span>
-            <span className="text-slate-200">{students.length} {t('persons')}</span>
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[11px] font-bold text-slate-300 flex flex-col gap-2">
+          <div className="flex justify-between items-center text-[10px] text-slate-400/80 font-normal">
+            <span>{t('appVersion')}</span>
+            <span>v0.3.0</span>
           </div>
           {activeClass?.startDate && (
-            <div className="flex justify-between items-center border-t border-slate-700/30 pt-2">
+            <div className="flex justify-between items-center border-t border-slate-700 pt-2">
               <span>{t('courseDuration')}</span>
               <span className="text-slate-200 truncate max-w-[120px]">{activeClass.startDate} {activeClass.endDate ? ` ${t('to')} ${activeClass.endDate}` : ''}</span>
             </div>
@@ -397,55 +398,55 @@ export const TeacherDashboard = ({
                            </div>
                         </button>
                         <button 
-                            onClick={() => setIsEditMode(!isEditMode)} 
-                            className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                             onClick={() => setIsEditMode(!isEditMode)} 
+                             className={`p-3 rounded-2xl transition-all duration-75 border-x border-t border-b-[4px] active:translate-y-[3px] active:border-b-0 cursor-pointer ${isEditMode ? 'bg-blue-600 border-blue-500 border-b-blue-800 text-white' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 border-b-slate-350 dark:border-b-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                          >
+                             {isEditMode ? <Check size={20} /> : <Edit size={20} />}
+                          </button>
+                       </div>
+
+                       <div className="relative mb-6">
+                            {searchQuery ? (
+                              <button 
+                                onClick={() => setSearchQuery('')}
+                                className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 p-1"
+                              >
+                                <X size={18} />
+                              </button>
+                            ) : (
+                              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" size={18} />
+                            )}
+                            <input 
+                              ref={searchInputRef}
+                              type="text" 
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder={t('searchPlaceholder')} 
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 ps-10 pe-4 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:focus:ring-blue-500 transition-all shadow-sm"
+                            />
+                       </div>
+
+                       {/* Time Filter Tabs */}
+                       <div className="bg-slate-250 dark:bg-slate-900/60 p-1 rounded-2xl flex gap-1 mb-6 text-xs font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-850 relative">
+                         <button
+                           onClick={() => { playSound(SFX_CLICK); setTimeFilter('all'); }}
+                           className={`flex-1 py-2.5 rounded-xl transition-all duration-75 ${timeFilter === 'all' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-300 dark:border-b-slate-950 font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:translate-y-[2px]'}`}
                          >
-                            {isEditMode ? <Check size={20} /> : <Edit size={20} />}
+                           {t('allTime')}
                          </button>
-                      </div>
-
-                      <div className="relative mb-6">
-                           {searchQuery ? (
-                             <button 
-                               onClick={() => setSearchQuery('')}
-                               className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 p-1"
-                             >
-                               <X size={18} />
-                             </button>
-                           ) : (
-                             <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" size={18} />
-                           )}
-                           <input 
-                             ref={searchInputRef}
-                             type="text" 
-                             value={searchQuery}
-                             onChange={(e) => setSearchQuery(e.target.value)}
-                             placeholder={t('searchPlaceholder')} 
-                             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 ps-10 pe-4 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:focus:ring-blue-500 transition-all shadow-sm"
-                           />
-                      </div>
-
-                      {/* Time Filter Tabs */}
-                      <div className="bg-slate-200/60 dark:bg-slate-900/60 backdrop-blur-sm p-1 rounded-2xl flex gap-1 mb-6 text-xs font-bold text-slate-500 dark:text-slate-400 relative">
-                        <button
-                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('all'); }}
-                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'all' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:scale-95'}`}
-                        >
-                          {t('allTime')}
-                        </button>
-                        <button
-                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('month'); }}
-                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'month' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:scale-95'}`}
-                        >
-                          {t('thisMonth')}
-                        </button>
-                        <button
-                          onClick={() => { playSound(SFX_CLICK); setTimeFilter('week'); }}
-                          className={`flex-1 py-2.5 rounded-xl transition-all ${timeFilter === 'week' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-sm font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:scale-95'}`}
-                        >
-                          {t('thisWeek')}
-                        </button>
-                      </div>
+                         <button
+                           onClick={() => { playSound(SFX_CLICK); setTimeFilter('month'); }}
+                           className={`flex-1 py-2.5 rounded-xl transition-all duration-75 ${timeFilter === 'month' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-300 dark:border-b-slate-950 font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:translate-y-[2px]'}`}
+                         >
+                           {t('thisMonth')}
+                         </button>
+                         <button
+                           onClick={() => { playSound(SFX_CLICK); setTimeFilter('week'); }}
+                           className={`flex-1 py-2.5 rounded-xl transition-all duration-75 ${timeFilter === 'week' ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-300 dark:border-b-slate-950 font-black' : 'hover:text-slate-700 dark:hover:text-slate-200 active:translate-y-[2px]'}`}
+                         >
+                           {t('thisWeek')}
+                         </button>
+                       </div>
 
                       <div className="grid gap-3">
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-2 flex items-center gap-2 justify-between">
@@ -490,7 +491,7 @@ export const TeacherDashboard = ({
                              <div className="flex items-center gap-3 overflow-hidden">
                                  <button 
                                     onClick={() => { playSound(SFX_CLICK); onSelectStudent(null); }} 
-                                    className={`flex items-center gap-1 font-bold text-sm bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 hover:text-slate-700 dark:hover:text-slate-250 transition-all z-20 overflow-hidden lg:hidden ${isScrolled ? 'text-slate-700 dark:text-slate-200 p-2 rounded-full w-9 justify-center' : 'text-slate-500 dark:text-slate-400 px-3 py-2 rounded-xl w-24'}`}
+                                    className={`flex items-center gap-1 font-bold text-sm bg-white dark:bg-slate-900 hover:text-slate-700 dark:hover:text-slate-250 transition-all duration-75 z-20 overflow-hidden lg:hidden border-x border-t ${isScrolled ? 'text-slate-700 dark:text-slate-200 p-2 rounded-full w-9 justify-center border-slate-200 dark:border-slate-800 border-b' : 'text-slate-500 dark:text-slate-400 px-3 py-2 rounded-2xl w-24 border-slate-200 dark:border-slate-800 border-b-[3px] border-b-slate-300 dark:border-b-slate-950 active:translate-y-[2px] active:border-b-0'}`}
                                  >
                                     {language === 'fa' ? <ArrowRight size={16} className="shrink-0" /> : <ArrowLeft size={16} className="shrink-0" />} 
                                     <span className={`whitespace-nowrap transition-all duration-300 ${isScrolled ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>{t('list')}</span>
@@ -508,19 +509,31 @@ export const TeacherDashboard = ({
                              </div>
 
                              <div className="flex items-center gap-2 z-20 shrink-0">
-                                <button onClick={goToPrevStudent} disabled={activeStudentIndex === 0} className={`p-2 rounded-xl border ${activeStudentIndex === 0 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-855'}`}>{language === 'fa' ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}</button>
+                                <button 
+                                  onClick={goToPrevStudent} 
+                                  disabled={activeStudentIndex === 0} 
+                                  className={`p-2 rounded-2xl transition-all duration-75 border-x border-t border-b-[3px] ${activeStudentIndex === 0 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent border-b-0 opacity-50 cursor-not-allowed' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 border-b-slate-300 dark:border-b-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800 active:translate-y-[2px] active:border-b-0 cursor-pointer'}`}
+                                >
+                                  {language === 'fa' ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}
+                                </button>
                                 <span className={`text-xs font-bold transition-colors text-slate-500 dark:text-slate-400`}>{activeStudentIndex + 1} / {students.length}</span>
-                                <button onClick={goToNextStudent} disabled={activeStudentIndex === sortedStudents.length - 1} className={`p-2 rounded-xl border ${activeStudentIndex === sortedStudents.length - 1 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-855'}`}>{language === 'fa' ? <ChevronLeft size={20}/> : <ChevronRight size={20}/>}</button>
+                                <button 
+                                  onClick={goToNextStudent} 
+                                  disabled={activeStudentIndex === sortedStudents.length - 1} 
+                                  className={`p-2 rounded-2xl transition-all duration-75 border-x border-t border-b-[3px] ${activeStudentIndex === sortedStudents.length - 1 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent border-b-0 opacity-50 cursor-not-allowed' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 border-b-slate-300 dark:border-b-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800 active:translate-y-[2px] active:border-b-0 cursor-pointer'}`}
+                                >
+                                  {language === 'fa' ? <ChevronLeft size={20}/> : <ChevronRight size={20}/>}
+                                </button>
                              </div>
                           </div>
                           
                           <div className="px-4">
-                            <div className="bg-slate-800 text-white p-4 rounded-2xl mb-6 shadow-lg relative overflow-hidden group">
+                            <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 border border-slate-800 text-white p-4 rounded-2xl mb-6 shadow-xl relative overflow-hidden group">
                                  <div className="absolute top-0 end-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-1/2 rtl:translate-x-1/2 ltr:-translate-x-1/2 pointer-events-none"></div>
                                  
                                 <div className="flex justify-between items-start mb-4">
                                   <div className="flex items-center gap-3">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black border-2 shadow-lg ${activeRankStyle}`}>{activeStudentRank}</div>
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-black ${activeRankStyle}`}>{activeStudentRank}</div>
                                     <button onClick={() => setEditingStudent(activeStudent)} className="text-start group/edit focus:outline-none">
                                       <h3 className="text-xl font-bold flex items-center gap-2">
                                           {activeStudent.name}
@@ -528,15 +541,15 @@ export const TeacherDashboard = ({
                                             <Edit size={12} />
                                           </div>
                                       </h3>
-                                      <div className="flex gap-2 text-xs text-slate-300 mt-1">
-                                         <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">💎</span> {activeStudent.diamonds}</span>
-                                         <span className="bg-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">⭐️</span> {activeStudent.stars}</span>
+                                      <div className="flex gap-2 text-xs text-slate-350 mt-1">
+                                         <span className="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">💎</span> {activeStudent.diamonds}</span>
+                                         <span className="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span className="text-sm">⭐️</span> {activeStudent.stars}</span>
                                       </div>
                                     </button>
                                   </div>
                                   <div className="text-center ms-8">
                                      <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-1">{activeStudent.streak} <Flame size={20} className="fill-current" /></div>
-                                     <div className="text-[10px] text-slate-300">{t('streak')}</div>
+                                     <div className="text-[10px] text-slate-350">{t('streak')}</div>
                                   </div>
                                 </div>
                                 
@@ -544,7 +557,7 @@ export const TeacherDashboard = ({
                                 {activeStudent.note && (
                                     <button 
                                         onClick={() => setEditingStudent(activeStudent)}
-                                        className="w-full mb-4 bg-slate-900/50 hover:bg-slate-900 p-2 rounded-lg text-xs text-slate-300 flex items-center gap-2 text-start transition-colors group/note"
+                                        className="w-full mb-4 bg-slate-950/40 hover:bg-slate-950/60 border border-slate-850 p-2 rounded-lg text-xs text-slate-300 flex items-center gap-2 text-start transition-colors group/note"
                                     >
                                         <StickyNote size={12} className="shrink-0" />
                                         <span className="flex-1 truncate">{activeStudent.note}</span>
@@ -554,18 +567,18 @@ export const TeacherDashboard = ({
 
                                 <div className="mb-4">
                                     <div className="flex justify-between text-xs text-slate-300 mb-1"><span>{t('positiveScore')}</span><span>{activeStudent.pluses}/5</span></div>
-                                    <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div className="bg-green-400 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
+                                    <div className="w-full bg-slate-950/60 h-2 rounded-full overflow-hidden border border-slate-800/40"><div className="bg-green-500 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 mt-4">
-                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsUp size={16} /> {t('praise')}</button>
-                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-bold text-sm shadow-md border-b-4 border-red-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"><ThumbsDown size={16} /> {t('warn')}</button>
+                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'positive')} className="bg-green-500 hover:bg-green-400 text-white rounded-2xl border-b-[4px] border-green-700 active:border-b-0 active:translate-y-[4px] transition-all duration-75 py-2 font-bold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer"><ThumbsUp size={16} /> {t('praise')}</button>
+                                    <button onClick={() => handleLocalManualPoint(activeStudent.id, 'negative')} className="bg-red-500 hover:bg-red-400 text-white rounded-2xl border-b-[4px] border-red-700 active:border-b-0 active:translate-y-[4px] transition-all duration-75 py-2 font-bold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer"><ThumbsDown size={16} /> {t('warn')}</button>
                                 </div>
-                                {activeStudent.lastAction && (<div className="bg-slate-900/50 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} language={language} /></div>)}
+                                {activeStudent.lastAction && (<div className="bg-slate-950/40 border border-slate-800 rounded-lg p-2 mt-3 flex justify-center"><TimeAgo timestamp={activeStudent.lastAction.timestamp} type={activeStudent.lastAction.type} language={language} /></div>)}
                             </div>
 
                             {/* Progress Report Card */}
                             {activeStudent && weekStats && monthStats && allStats && (
-                              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl mb-6 shadow-sm border border-slate-200/80 dark:border-slate-800 text-start">
+                              <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl mb-6 shadow-sm border border-slate-200 dark:border-slate-800 text-start">
                                 <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
                                   <Trophy size={16} className="text-yellow-500 shrink-0" />
                                   <span>{t('progressReport')} ({activeStudent.name})</span>
@@ -579,10 +592,10 @@ export const TeacherDashboard = ({
                                   <div className="text-slate-500 dark:text-slate-400 font-medium py-1 font-bold">{t('points')}</div>
                                   
                                   {/* Week Row */}
-                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800/85 flex items-center">{t('thisWeek')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{weekStats.recitation} {weekStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{weekStats.memorization} {weekStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800/85 flex justify-center gap-1 items-center flex-wrap">
+                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800 flex items-center">{t('thisWeek')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{weekStats.recitation} {weekStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{weekStats.memorization} {weekStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800 flex justify-center gap-1 items-center flex-wrap">
                                     {weekStats.diamonds > 0 && <span>💎{weekStats.diamonds}</span>}
                                     {weekStats.stars > 0 && <span>⭐️{weekStats.stars}</span>}
                                     {weekStats.pluses > 0 && <span className="text-green-500 font-bold">+{weekStats.pluses}</span>}
@@ -590,10 +603,10 @@ export const TeacherDashboard = ({
                                   </div>
                                   
                                   {/* Month Row */}
-                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800/85 flex items-center">{t('thisMonth')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{monthStats.recitation} {monthStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{monthStats.memorization} {monthStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800/85 flex justify-center gap-1 items-center flex-wrap">
+                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800 flex items-center">{t('thisMonth')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{monthStats.recitation} {monthStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{monthStats.memorization} {monthStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800 flex justify-center gap-1 items-center flex-wrap">
                                     {monthStats.diamonds > 0 && <span>💎{monthStats.diamonds}</span>}
                                     {monthStats.stars > 0 && <span>⭐️{monthStats.stars}</span>}
                                     {monthStats.pluses > 0 && <span className="text-green-500 font-bold">+{monthStats.pluses}</span>}
@@ -601,10 +614,10 @@ export const TeacherDashboard = ({
                                   </div>
                                   
                                   {/* All Time Row */}
-                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800/85 flex items-center">{t('allTime')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{allStats.recitation} {allStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800/85 font-semibold">{allStats.memorization} {allStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
-                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800/85 flex justify-center gap-1 items-center flex-wrap">
+                                  <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800 flex items-center">{t('allTime')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{allStats.recitation} {allStats.recitation === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="text-slate-700 dark:text-slate-300 py-2 border-t border-slate-100 dark:border-slate-800 font-semibold">{allStats.memorization} {allStats.memorization === 1 ? t('ayah') : t('ayahs')}</div>
+                                  <div className="py-2 border-t border-slate-100 dark:border-slate-800 flex justify-center gap-1 items-center flex-wrap">
                                     {allStats.diamonds > 0 && <span>💎{allStats.diamonds}</span>}
                                     {allStats.stars > 0 && <span>⭐️{allStats.stars}</span>}
                                     {allStats.pluses > 0 && <span className="text-green-500 font-bold">+{allStats.pluses}</span>}
@@ -614,11 +627,11 @@ export const TeacherDashboard = ({
                               </div>
                             )}
 
-                            <div className="sticky top-[60px] z-20 bg-slate-100/90 dark:bg-slate-950/90 backdrop-blur-md py-2 -mx-4 px-4 mb-4 border-b border-slate-200/40 dark:border-slate-800/40">
-                                <div className="bg-slate-200 dark:bg-slate-900 p-1 rounded-xl flex">
-                                    <button onClick={() => setMode('recitation')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'recitation' ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}><BookOpen size={18} /> {t('recitation')}</button>
-                                    <button onClick={() => setMode('memorization')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all z-10 flex items-center justify-center gap-2 ${mode === 'memorization' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}><Brain size={18} /> {t('memorization')}</button>
-                                </div>
+                            <div className="sticky top-[60px] z-20 bg-slate-100/90 dark:bg-slate-950/90 backdrop-blur-md py-2 -mx-4 px-4 mb-4 border-b border-slate-200 dark:border-slate-800">
+                                 <div className="bg-slate-250 dark:bg-slate-900/60 p-1 rounded-2xl flex border border-slate-200 dark:border-slate-800">
+                                     <button onClick={() => setMode('recitation')} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-75 z-10 flex items-center justify-center gap-2 ${mode === 'recitation' ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-300 dark:border-b-slate-950' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}><BookOpen size={18} /> {t('recitation')}</button>
+                                     <button onClick={() => setMode('memorization')} className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-75 z-10 flex items-center justify-center gap-2 ${mode === 'memorization' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-300 dark:border-b-slate-950' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}><Brain size={18} /> {t('memorization')}</button>
+                                 </div>
                             </div>
                             <div className="space-y-3">
                                   {SURAHS.map((surah) => <TeacherSurahItem key={surah.id} surah={surah} student={activeStudent} mode={mode} onUpdateProgress={onUpdateProgress} showToast={showToast} language={language} />)}
@@ -647,8 +660,8 @@ export const TeacherDashboard = ({
               <span className="text-[10px] font-bold">{t('settings')}</span>
             </button>
             
-            <button onClick={() => { setIsAdding(true); }} className="flex flex-col items-center justify-center -mt-8">
-               <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-4 border-slate-100 dark:border-slate-950 shadow-xl shadow-blue-200/50 dark:shadow-none active:scale-90 transition-transform">
+            <button onClick={() => { setIsAdding(true); }} className="flex flex-col items-center justify-center -mt-8 group focus:outline-none">
+               <div className="bg-blue-600 text-white rounded-2xl w-14 h-14 flex items-center justify-center border-x border-t border-b-[4px] border-blue-500 border-b-blue-800 group-active:border-b-0 group-active:translate-y-[4px] shadow-xl shadow-blue-200/50 dark:shadow-none transition-all duration-75">
                   <UserPlus size={28} />
                </div>
                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">{t('add')}</span>

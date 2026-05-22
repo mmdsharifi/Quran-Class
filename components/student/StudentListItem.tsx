@@ -52,18 +52,24 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
   });
 
   // Ranking and ring styles
-  let rankStyle = 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
-  let ringColor = 'border-slate-100 dark:border-slate-900';
+  let rankStyle = 'bg-slate-100 text-slate-500 border-b-[3px] border-slate-350 dark:bg-slate-800 dark:text-slate-455 dark:border-slate-700';
+  let ringColor = 'border-slate-200 dark:border-slate-800';
+  let borderBColor = 'border-b-slate-300 dark:border-b-slate-950';
+  const isActive = activeStudentId === student.id;
+
   if (!isEditMode) {
     if (globalIndex === 0) {
-      rankStyle = 'bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200/50';
-      ringColor = 'border-yellow-400';
+      rankStyle = 'bg-amber-400 text-amber-950 border-b-[3px] border-amber-600';
+      ringColor = 'border-amber-300 dark:border-amber-900/60';
+      borderBColor = 'border-b-amber-500 dark:border-b-amber-700';
     } else if (globalIndex === 1) {
-      rankStyle = 'bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200/50';
-      ringColor = 'border-slate-300';
+      rankStyle = 'bg-slate-300 text-slate-800 border-b-[3px] border-slate-500 dark:bg-slate-400 dark:text-slate-900 dark:border-slate-600';
+      ringColor = 'border-slate-300 dark:border-slate-750';
+      borderBColor = 'border-b-slate-400 dark:border-b-slate-800';
     } else if (globalIndex === 2) {
-      rankStyle = 'bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200/50';
-      ringColor = 'border-orange-300';
+      rankStyle = 'bg-amber-600 text-amber-50 border-b-[3px] border-amber-800 dark:bg-amber-700 dark:border-amber-900';
+      ringColor = 'border-amber-500 dark:border-amber-800';
+      borderBColor = 'border-b-amber-750 dark:border-b-amber-900';
     }
   }
 
@@ -302,18 +308,20 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               }
             }
           }}
-          className={`w-full flex flex-col bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${
+          className={`w-full flex flex-col p-4 rounded-2xl transition-all duration-75 relative overflow-hidden border-x border-t border-b-[4px] ${
             isEditMode
-              ? 'border-dashed border-slate-300 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20'
-              : `${
-                  globalIndex < 3 ? ringColor : 'border-transparent dark:border-transparent'
-                } hover:border-green-400 dark:hover:border-green-500`
+              ? 'bg-white dark:bg-slate-900 border-dashed border-slate-300 dark:border-slate-800 border-b-slate-300 dark:border-b-slate-955 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20'
+              : isActive
+                ? 'bg-blue-50/30 dark:bg-blue-950/20 border-blue-400 dark:border-blue-800 border-b-blue-600 dark:border-b-blue-900 shadow-md active:translate-y-[3px] active:border-b-[1px]'
+                : `active:translate-y-[3px] active:border-b-[1px] hover:bg-slate-50 dark:hover:bg-slate-850/50 ${
+                    globalIndex < 3 ? `bg-white dark:bg-slate-900 ${ringColor} ${borderBColor}` : `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 ${borderBColor}`
+                  }`
           }`}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-b-2 shadow-sm transition-all ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-black shadow-sm transition-all border-x border-t border-transparent ${
                   isEditMode ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 scale-90' : rankStyle
                 }`}
               >
@@ -328,12 +336,12 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                     {timeFilter === 'all' ? (
                       <>
                         {student.diamonds > 0 && (
-                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900 font-bold">
                             <span className="text-[10px]">💎</span> {student.diamonds}
                           </span>
                         )}
                         {(student.stars > 0 || student.diamonds > 0) && (
-                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900 font-bold">
                             <span className="text-[10px]">⭐️</span> {student.stars}
                           </span>
                         )}
@@ -346,17 +354,17 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                     ) : (
                       <>
                         {stats.diamonds > 0 && (
-                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900 font-bold">
                             <span className="text-[10px]">💎</span> {stats.diamonds}
                           </span>
                         )}
                         {stats.stars > 0 && (
-                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900 font-bold">
                             <span className="text-[10px]">⭐️</span> {stats.stars}
                           </span>
                         )}
                         {stats.pluses > 0 && (
-                          <span className="bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 dark:border-green-900/40 font-bold">
+                          <span className="bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 dark:border-green-900 font-bold">
                             <span className="text-[10px]">+</span>
                             {stats.pluses}
                           </span>
@@ -402,7 +410,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
             )}
           </div>
           {!isEditMode && student.note && (
-            <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg flex items-start gap-1 w-full text-start border border-slate-100 dark:border-slate-800/80">
+            <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg flex items-start gap-1 w-full text-start border border-slate-100 dark:border-slate-800">
               <StickyNote size={10} className="mt-0.5 text-slate-500 dark:text-slate-400 shrink-0" />
               {student.note}
             </div>

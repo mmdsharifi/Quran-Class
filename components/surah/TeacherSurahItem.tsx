@@ -29,8 +29,8 @@ const TeacherSurahItemComponent: React.FC<{
   const ayahsList = Array.from({ length: surah.ayahs }, (_, i) => i + 1);
   const lastReview = student.lastReview?.[surah.id];
   const memoryStatus = mode === 'memorization' && isFullyCompleted ? calculateMemoryHealth(lastReview) : null;
-  const themeText = mode === 'recitation' ? 'text-green-500' : 'text-purple-500';
-  const themeBtn = mode === 'recitation' ? 'bg-green-500 border-green-700' : 'bg-purple-500 border-purple-700';
+  const themeText = mode === 'recitation' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400';
+  const themeBtn = mode === 'recitation' ? 'bg-green-600 dark:bg-green-650 hover:bg-green-500' : 'bg-purple-600 dark:bg-purple-650 hover:bg-purple-500';
 
   const reviewHistory = student.reviewHistory?.[surah.id] || (lastReview ? [lastReview] : []);
 
@@ -49,7 +49,7 @@ const TeacherSurahItemComponent: React.FC<{
   };
 
   return (
-    <div className={`rounded-xl border-b-4 transition-colors overflow-hidden ${isFullyCompleted ? (mode === 'recitation' ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/40' : 'bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900/40') : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
+    <div className={`rounded-2xl border-x border-t border-b-[4px] transition-all overflow-hidden ${isFullyCompleted ? (mode === 'recitation' ? 'bg-green-50/20 dark:bg-green-950/10 border-green-200 dark:border-green-900 border-b-green-400 dark:border-b-green-600' : 'bg-purple-50/20 dark:bg-purple-950/10 border-purple-200 dark:border-purple-900 border-b-purple-400 dark:border-b-purple-600') : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 border-b-slate-300 dark:border-b-slate-950'}`}>
       <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/45 transition-colors" onClick={() => setIsOpen(!isOpen)}>
         <div className="flex items-center gap-3">
            <AudioPlayer surahId={surah.id} showToast={showToast} language={language} />
@@ -75,7 +75,7 @@ const TeacherSurahItemComponent: React.FC<{
               </button>
            </div>
            {showText && (
-             <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 text-center relative">
+             <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-100 dark:border-amber-900 text-center relative">
                 <div className="text-2xl text-slate-800 dark:text-amber-100/90 leading-loose font-quran" dir="rtl">{QURAN_TEXT[surah.id] || "..."}</div>
                 <div className="text-[10px] text-amber-500/80 dark:text-amber-500/50 mt-2">{t('uthmaniScript')}</div>
              </div>
@@ -104,13 +104,32 @@ const TeacherSurahItemComponent: React.FC<{
                    )}
                </div>
            )}
-           <div className="flex justify-between items-center mb-3">
-             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{mode === 'recitation' ? t('recitationAyahs') : t('memorizationAyahs')}</span>
-             <button onClick={(e) => { e.stopPropagation(); handleFullComplete(); }} className={`text-xs px-2 py-1 rounded bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-sm ${themeText} active:scale-95 transition-transform`}>{isFullyCompleted ? t('reviewAgain') : t('markAll')}</button>
-           </div>
-           <div className="grid grid-cols-5 gap-2">
-              {ayahsList.map(ayah => (<button key={ayah} onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} className={`aspect-square rounded-lg flex items-center justify-center text-sm font-bold border-b-2 transition-all ${completedAyahs.includes(ayah) ? `${themeBtn} text-white shadow-sm` : 'bg-white dark:bg-slate-850 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>{ayah}</button>))}
-           </div>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{mode === 'recitation' ? t('recitationAyahs') : t('memorizationAyahs')}</span>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleFullComplete(); }} 
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl bg-white dark:bg-slate-850 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-350 dark:border-b-slate-950 ${themeText} active:translate-y-[2px] active:border-b-[1px] hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-75`}
+              >
+                {isFullyCompleted ? t('reviewAgain') : t('markAll')}
+              </button>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+                {ayahsList.map(ayah => (
+                  <button 
+                    key={ayah} 
+                    onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} 
+                    className={`aspect-square rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-75 active:translate-y-[2px] active:border-b-[1px] cursor-pointer ${
+                      completedAyahs.includes(ayah) 
+                        ? mode === 'recitation'
+                          ? 'bg-green-500 hover:bg-green-400 text-white border-x border-t border-b-[3px] border-green-500 border-b-green-700 dark:bg-green-650 dark:hover:bg-green-600 dark:border-green-650 dark:border-b-green-800'
+                          : 'bg-purple-500 hover:bg-purple-400 text-white border-x border-t border-b-[3px] border-purple-500 border-b-purple-700 dark:bg-purple-650 dark:hover:bg-purple-600 dark:border-purple-650 dark:border-b-purple-800'
+                        : 'bg-white dark:bg-slate-855 text-slate-500 dark:text-slate-400 border-x border-t border-b-[3px] border-slate-200 dark:border-slate-750 border-b-slate-350 dark:border-b-slate-950 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {ayah}
+                  </button>
+                ))}
+            </div>
         </div>
       )}
     </div>
