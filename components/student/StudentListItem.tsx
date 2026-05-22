@@ -3,6 +3,7 @@ import { Edit, Settings, ThumbsUp, ThumbsDown, ChevronRight, StickyNote, Refresh
 import { playSound, calculateMemoryHealth } from '../../utils/helpers';
 import { SFX_CLICK } from '../../constants';
 import { Student } from '../../types';
+import { translate } from '../../translations';
 
 interface StudentListItemProps {
   student: Student;
@@ -20,6 +21,7 @@ interface StudentListItemProps {
   onSelect: (studentId: number) => void;
   onEdit: (student: Student) => void;
   onManualPoint: (studentId: number, type: 'positive' | 'negative') => void;
+  language: 'fa' | 'en';
 }
 
 export const StudentListItem: React.FC<StudentListItemProps> = ({
@@ -32,7 +34,9 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
   onSelect,
   onEdit,
   onManualPoint,
+  language,
 }) => {
+  const t = (key: Parameters<typeof translate>[0]) => translate(key, language);
   const cardRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const leftBgRef = useRef<HTMLDivElement>(null);
@@ -48,17 +52,17 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
   });
 
   // Ranking and ring styles
-  let rankStyle = 'bg-slate-100 text-slate-500';
-  let ringColor = 'border-slate-100';
+  let rankStyle = 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+  let ringColor = 'border-slate-100 dark:border-slate-900';
   if (!isEditMode) {
     if (globalIndex === 0) {
-      rankStyle = 'bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200';
+      rankStyle = 'bg-yellow-400 text-yellow-900 border-yellow-500 shadow-yellow-200/50';
       ringColor = 'border-yellow-400';
     } else if (globalIndex === 1) {
-      rankStyle = 'bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200';
+      rankStyle = 'bg-slate-300 text-slate-800 border-slate-400 shadow-slate-200/50';
       ringColor = 'border-slate-300';
     } else if (globalIndex === 2) {
-      rankStyle = 'bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200';
+      rankStyle = 'bg-orange-300 text-orange-900 border-orange-400 shadow-orange-200/50';
       ringColor = 'border-orange-300';
     }
   }
@@ -257,7 +261,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
         >
           <div className="flex items-center gap-2">
             <ThumbsUp size={24} className="animate-bounce" />
-            <span className="text-sm font-bold" dir="rtl">تشویق (۱+)</span>
+            <span className="text-sm font-bold">{t('praise')}</span>
           </div>
         </div>
 
@@ -267,7 +271,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
           className="absolute inset-0 bg-gradient-to-l from-red-500 to-red-400 flex items-center justify-end px-6 text-white font-bold opacity-0 transition-opacity duration-150"
         >
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold" dir="rtl">تذکر (۱-)</span>
+            <span className="text-sm font-bold">{t('warn')}</span>
             <ThumbsDown size={24} className="animate-bounce" />
           </div>
         </div>
@@ -298,43 +302,43 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               }
             }
           }}
-          className={`w-full flex flex-col bg-white p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${
+          className={`w-full flex flex-col bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-2 transition-all relative overflow-hidden ${
             isEditMode
-              ? 'border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50'
+              ? 'border-dashed border-slate-300 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20'
               : `${
-                  globalIndex < 3 ? ringColor : 'border-transparent'
-                } hover:border-green-400`
+                  globalIndex < 3 ? ringColor : 'border-transparent dark:border-transparent'
+                } hover:border-green-400 dark:hover:border-green-500`
           }`}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-b-2 shadow-sm transition-all ${
-                  isEditMode ? 'bg-slate-200 text-slate-400 scale-90' : rankStyle
+                  isEditMode ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 scale-90' : rankStyle
                 }`}
               >
                 {isEditMode ? <Edit size={18} /> : globalIndex + 1}
               </div>
-              <div className="text-right">
-                <div className="font-bold text-slate-700 text-sm text-right">
+              <div className="text-start">
+                <div className="font-bold text-slate-700 dark:text-slate-200 text-sm text-start">
                   {student.name}
                 </div>
                 {!isEditMode && (
-                  <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
                     {timeFilter === 'all' ? (
                       <>
                         {student.diamonds > 0 && (
-                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
                             <span className="text-[10px]">💎</span> {student.diamonds}
                           </span>
                         )}
                         {(student.stars > 0 || student.diamonds > 0) && (
-                          <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
                             <span className="text-[10px]">⭐️</span> {student.stars}
                           </span>
                         )}
                         {student.pluses > 0 && (
-                          <span className="text-green-500 text-[10px] font-bold">
+                          <span className="text-green-500 dark:text-green-400 text-[10px] font-bold">
                             +{student.pluses}
                           </span>
                         )}
@@ -342,36 +346,36 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                     ) : (
                       <>
                         {stats.diamonds > 0 && (
-                          <span className="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 font-bold">
+                          <span className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-100 dark:border-blue-900/40 font-bold">
                             <span className="text-[10px]">💎</span> {stats.diamonds}
                           </span>
                         )}
                         {stats.stars > 0 && (
-                          <span className="bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 font-bold">
+                          <span className="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-yellow-100 dark:border-yellow-900/40 font-bold">
                             <span className="text-[10px]">⭐️</span> {stats.stars}
                           </span>
                         )}
                         {stats.pluses > 0 && (
-                          <span className="bg-green-50 text-green-600 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 font-bold">
+                          <span className="bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1 border border-green-100 dark:border-green-900/40 font-bold">
                             <span className="text-[10px]">+</span>
                             {stats.pluses}
                           </span>
                         )}
 
                         {stats.recitation > 0 || stats.memorization > 0 ? (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                            {stats.recitation > 0 && <span>روخوانی: {stats.recitation}</span>}
+                          <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                            {stats.recitation > 0 && <span>{t('recitation')}: {stats.recitation}</span>}
                             {stats.recitation > 0 && stats.memorization > 0 && (
-                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-300 dark:text-slate-700">•</span>
                             )}
-                            {stats.memorization > 0 && <span>حفظ: {stats.memorization}</span>}
+                            {stats.memorization > 0 && <span>{t('memorization')}: {stats.memorization}</span>}
                           </span>
                         ) : (
                           stats.diamonds === 0 &&
                           stats.stars === 0 &&
                           stats.pluses === 0 && (
-                            <span className="text-[10px] text-slate-300 italic">
-                              بدون فعالیت
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 italic">
+                              {t('noActivity')}
                             </span>
                           )
                         )}
@@ -382,7 +386,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               </div>
             </div>
             {isEditMode ? (
-              <div className="bg-slate-100 p-2 rounded-full text-slate-400">
+              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400">
                 <Settings size={16} />
               </div>
             ) : Object.keys(student.memorizationProgress || {}).some(
@@ -390,16 +394,16 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                   calculateMemoryHealth(student.lastReview?.[Number(id)]).status ===
                   'critical'
               ) ? (
-              <div className="bg-red-50 text-red-500 p-2 rounded-full animate-pulse">
+              <div className="bg-red-50 dark:bg-red-950/35 text-red-500 dark:text-red-400 p-2 rounded-full animate-pulse">
                 <RefreshCw size={14} />
               </div>
             ) : (
-              <ChevronRight className="text-slate-300 group-hover:-translate-x-1 transition-transform" />
+              <ChevronRight className="text-slate-300 dark:text-slate-600 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 transition-transform" />
             )}
           </div>
           {!isEditMode && student.note && (
-            <div className="mt-2 text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg flex items-start gap-1 w-full text-right border border-slate-100">
-              <StickyNote size={10} className="mt-0.5 text-slate-400 shrink-0" />
+            <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg flex items-start gap-1 w-full text-start border border-slate-100 dark:border-slate-800/80">
+              <StickyNote size={10} className="mt-0.5 text-slate-500 dark:text-slate-400 shrink-0" />
               {student.note}
             </div>
           )}

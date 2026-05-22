@@ -8,6 +8,8 @@ import {
 export const DEFAULT_SETTINGS = Object.freeze({
   rokhvaniDays: [6, 1, 3],
   hefzDays: [0, 2, 4, 5],
+  theme: 'system',
+  language: 'fa',
 });
 
 export const loadJsonFromStorage = (storage, key, fallback) => {
@@ -182,13 +184,13 @@ export const applyManualPointForStudent = ({
   });
 
 export const buildNewStudent = (studentData, id = Date.now()) => ({
-  ...studentData,
-  id,
   completedSurahs: [],
   ayahProgress: {},
   memorizationProgress: {},
   lastReview: {},
   streak: 0,
+  ...studentData,
+  id,
   diamonds: Number(studentData.diamonds || 0),
   stars: Number(studentData.stars || 0),
   pluses: Number(studentData.pluses || 0),

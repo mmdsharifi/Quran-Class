@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { X, Check, Edit, Trash2, Calendar, BookOpen, Plus, Save, Undo2, Archive, ArchiveRestore, ChevronRight } from 'lucide-react';
 import { QuranClass } from '../../types';
+import { translate } from '../../translations';
 
 interface ClassManagementSheetProps {
   classes: QuranClass[];
   activeClassId: string;
+  language: 'fa' | 'en';
   onSelectClass: (id: string) => void;
   onCreateClass: (
     name: string,
@@ -26,6 +28,7 @@ const DEFAULT_EMOJIS = ['🕌', '🕋', '🍁', '🌸', '📚', '🌟', '✏️'
 export const ClassManagementSheet = ({
   classes,
   activeClassId,
+  language,
   onSelectClass,
   onCreateClass,
   onEditClass,
@@ -54,6 +57,8 @@ export const ClassManagementSheet = ({
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
 
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => translate(key, language, params);
+
   const handleStartEdit = (c: QuranClass, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent class switching click
     setEditingClassId(c.id);
@@ -66,7 +71,7 @@ export const ClassManagementSheet = ({
   const handleSaveEdit = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!editName.trim()) {
-      showToast('نام کلاس نمی‌تواند خالی باشد', 'error');
+      showToast(t('classNameNotEmpty'), 'error');
       return;
     }
     onEditClass(id, {
@@ -76,7 +81,7 @@ export const ClassManagementSheet = ({
       endDate: editEndDate,
     });
     setEditingClassId(null);
-    showToast('مشخصات کلاس بروزرسانی شد', 'success');
+    showToast(t('classUpdated'), 'success');
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
@@ -90,19 +95,19 @@ export const ClassManagementSheet = ({
     const isTargetActive = targetClass ? !targetClass.archived : false;
 
     if (classes.length <= 1) {
-      showToast('حداقل باید یک کلاس در سیستم وجود داشته باشد', 'error');
+      showToast(t('atLeastOneClass'), 'error');
       return;
     }
     if (isTargetActive && activeClasses.length <= 1) {
-      showToast('حداقل باید یک کلاس فعال داشته باشید', 'error');
+      showToast(t('atLeastOneActiveClass'), 'error');
       return;
     }
     confirm(
-      'حذف کلاس',
-      `آیا از حذف کلاس "${name}" اطمینان دارید؟ تمامی اطلاعات مربوط به دانش‌آموزان این کلاس به طور کامل حذف خواهد شد.`,
+      t('deleteClassConfirmTitle'),
+      t('deleteClassConfirmDesc', { name }),
       () => {
         onDeleteClass(id);
-        showToast('کلاس با موفقیت حذف شد', 'success');
+        showToast(t('classDeleted'), 'success');
       },
       true
     );
@@ -111,15 +116,15 @@ export const ClassManagementSheet = ({
   const handleArchive = (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (activeClasses.length <= 1) {
-      showToast('حداقل باید یک کلاس فعال داشته باشید', 'error');
+      showToast(t('atLeastOneActiveClass'), 'error');
       return;
     }
     confirm(
-      'بایگانی کلاس',
-      `آیا از بایگانی کردن کلاس "${name}" اطمینان دارید؟`,
+      t('archiveClassConfirmTitle'),
+      t('archiveClassConfirmDesc', { name }),
       () => {
         onArchiveClass(id, true);
-        showToast('کلاس با موفقیت بایگانی شد', 'success');
+        showToast(t('classArchivedSuccess'), 'success');
       }
     );
   };
@@ -127,13 +132,13 @@ export const ClassManagementSheet = ({
   const handleRestore = (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     onArchiveClass(id, false);
-    showToast(`کلاس "${name}" با موفقیت بازیابی شد`, 'success');
+    showToast(t('classRestored', { name }), 'success');
   };
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newClassName.trim()) {
-      showToast('نام کلاس الزامی است', 'error');
+      showToast(t('classNameRequired'), 'error');
       return;
     }
     onCreateClass(
@@ -143,7 +148,7 @@ export const ClassManagementSheet = ({
       newEndDate,
       firstStudentName.trim()
     );
-    showToast('کلاس جدید با موفقیت ایجاد شد', 'success');
+    showToast(t('classCreated'), 'success');
     // Reset Form
     setNewClassName('');
     setNewClassEmoji('🕌');
@@ -160,15 +165,15 @@ export const ClassManagementSheet = ({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-slate-50 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[92vh] lg:max-h-[85vh] overflow-y-auto"
+        className="bg-slate-50 dark:bg-slate-900 w-full max-w-md rounded-t-3xl lg:rounded-3xl shadow-2xl p-6 relative animate-in slide-in-from-bottom lg:zoom-in-95 duration-300 max-h-[92vh] lg:max-h-[85vh] overflow-y-auto"
       >
-        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-6"></div>
+        <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
         
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-black text-slate-700 flex items-center gap-2">
-            <BookOpen size={20} className="text-blue-500" /> مدیریت کلاس‌ها
+          <h2 className="text-lg font-black text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <BookOpen size={20} className="text-blue-500" /> {t('classManagementTitle')}
           </h2>
-          <button onClick={onClose} className="bg-slate-200 p-2 rounded-full text-slate-500 hover:bg-slate-300">
+          <button onClick={onClose} className="bg-slate-200 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700">
             <X size={20} />
           </button>
         </div>
@@ -178,12 +183,12 @@ export const ClassManagementSheet = ({
           {!showAddForm && (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-400">لیست کلاس‌های شما</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('classesList')}</span>
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold flex items-center gap-1 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg transition-colors"
                 >
-                  <Plus size={14} /> کلاس جدید
+                  <Plus size={14} /> {t('addNewClass')}
                 </button>
               </div>
 
@@ -197,24 +202,24 @@ export const ClassManagementSheet = ({
                     return (
                       <div
                         key={c.id}
-                        className="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm flex flex-col gap-3"
+                        className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-blue-200 dark:border-blue-900/45 shadow-sm flex flex-col gap-3"
                       >
                         <div className="grid grid-cols-4 gap-2">
                           <div className="col-span-3">
-                            <label className="block text-[10px] font-bold text-slate-400 mb-0.5">نام کلاس</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('className')}</label>
                             <input
                               type="text"
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 mb-0.5">ایموجی</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('emoji')}</label>
                             <select
                               value={editEmoji}
                               onChange={(e) => setEditEmoji(e.target.value)}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-700 outline-none focus:border-blue-400 text-center"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 dark:focus:border-blue-500 text-center"
                             >
                               {DEFAULT_EMOJIS.map((emo) => (
                                 <option key={emo} value={emo}>{emo}</option>
@@ -225,23 +230,23 @@ export const ClassManagementSheet = ({
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 mb-0.5">تاریخ شروع</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('startDate')}</label>
                             <input
                               type="text"
                               value={editStartDate}
                               onChange={(e) => setEditStartDate(e.target.value)}
-                              placeholder="مثلا ۱۴۰۴/۰۷/۰۱"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-600 outline-none focus:border-blue-400"
+                              placeholder={t('startPlaceholder')}
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 mb-0.5">تاریخ پایان</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('endDate')}</label>
                             <input
                               type="text"
                               value={editEndDate}
                               onChange={(e) => setEditEndDate(e.target.value)}
-                              placeholder="مثلا ۱۴۰۴/۱۰/۰۱"
-                              className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-600 outline-none focus:border-blue-400"
+                              placeholder={t('endPlaceholder')}
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                         </div>
@@ -249,15 +254,15 @@ export const ClassManagementSheet = ({
                         <div className="flex gap-2 justify-end mt-1">
                           <button
                             onClick={handleCancelEdit}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                           >
-                            انصراف
+                            {t('cancelClass')}
                           </button>
                           <button
                             onClick={(e) => handleSaveEdit(c.id, e)}
                             className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-1"
                           >
-                            <Save size={12} /> ذخیره
+                            <Save size={12} /> {t('saveClass')}
                           </button>
                         </div>
                       </div>
@@ -271,26 +276,26 @@ export const ClassManagementSheet = ({
                         onSelectClass(c.id);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl border-2 text-right transition-all group ${
+                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl border-2 text-start transition-all group ${
                         isActive
-                          ? 'border-blue-500 bg-blue-50/50 shadow-sm'
-                          : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50'
+                          ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-sm'
+                          : 'border-slate-100 dark:border-slate-900 bg-white dark:bg-slate-950 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-slate-50 dark:hover:bg-slate-900'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{c.emoji || '🕌'}</span>
-                        <div className="text-right">
-                          <span className="font-bold text-sm text-slate-700 flex items-center gap-1.5">
+                        <div className="text-start">
+                          <span className="font-bold text-sm text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                             {c.name}
                             {isActive && (
-                              <span className="bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-md font-bold">
-                                فعال
+                              <span className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold">
+                                {t('active')}
                               </span>
                             )}
                           </span>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">
-                            {studentCount} شاگرد
-                            {c.startDate && ` | دوره: از ${c.startDate} تا ${c.endDate || '---'}`}
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                            {studentCount} {t('persons')}
+                            {c.startDate && ` | ${t('courseLabel')} ${c.startDate} ${t('to')} ${c.endDate || '---'}`}
                           </span>
                         </div>
                       </div>
@@ -298,24 +303,24 @@ export const ClassManagementSheet = ({
                       <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => handleStartEdit(c, e)}
-                          className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-700"
-                          title="ویرایش کلاس"
+                          className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                          title={t('editClass')}
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={(e) => handleArchive(c.id, c.name, e)}
                           disabled={activeClasses.length <= 1}
-                          className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-500 hover:text-amber-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:text-slate-300"
-                          title="بایگانی کلاس"
+                          className="p-1.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/20 text-amber-500 dark:text-amber-400 hover:text-amber-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:text-slate-350"
+                          title={t('archive')}
                         >
                           <Archive size={14} />
                         </button>
                         {classes.length > 1 && (
                           <button
                             onClick={(e) => handleDelete(c.id, c.name, e)}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500"
-                            title="حذف کلاس"
+                            className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400"
+                            title={t('deleteClassConfirmTitle')}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -328,14 +333,14 @@ export const ClassManagementSheet = ({
 
               {/* Collapsible Archived Classes Accordion */}
               {archivedClasses.length > 0 && (
-                <div className="mt-4 border-t border-slate-200 pt-4">
+                <div className="mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">
                   <button
                     onClick={() => setShowArchived(!showArchived)}
-                    className="w-full flex items-center justify-between text-xs font-bold text-slate-400 hover:text-slate-600 py-1"
+                    className="w-full flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 py-1"
                   >
                     <span className="flex items-center gap-1.5">
-                      <Archive size={14} className="text-slate-400" />
-                      کلاس‌های بایگانی‌شده ({archivedClasses.length})
+                      <Archive size={14} className="text-slate-500 dark:text-slate-400" />
+                      {t('archivedClassesTitle', { count: archivedClasses.length })}
                     </span>
                     <ChevronRight
                       size={14}
@@ -350,17 +355,17 @@ export const ClassManagementSheet = ({
                         return (
                           <div
                             key={c.id}
-                            className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/50 text-right"
+                            className="w-full flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/30 text-start"
                           >
                             <div className="flex items-center gap-3">
                               <span className="text-xl opacity-60">{c.emoji || '🕌'}</span>
-                              <div className="text-right">
-                                <span className="font-bold text-sm text-slate-500">
+                              <div className="text-start">
+                                <span className="font-bold text-sm text-slate-500 dark:text-slate-400">
                                   {c.name}
                                 </span>
-                                <span className="text-[10px] text-slate-400 block mt-0.5">
-                                  {studentCount} شاگرد
-                                  {c.startDate && ` | دوره: از ${c.startDate} تا ${c.endDate || '---'}`}
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                                  {studentCount} {t('persons')}
+                                  {c.startDate && ` | ${t('courseLabel')} ${c.startDate} ${t('to')} ${c.endDate || '---'}`}
                                 </span>
                               </div>
                             </div>
@@ -368,15 +373,15 @@ export const ClassManagementSheet = ({
                             <div className="flex gap-1">
                               <button
                                 onClick={(e) => handleRestore(c.id, c.name, e)}
-                                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-700"
-                                title="بازیابی کلاس"
+                                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                                title={t('unarchive')}
                               >
                                 <ArchiveRestore size={14} />
                               </button>
                               <button
                                 onClick={(e) => handleDelete(c.id, c.name, e)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500"
-                                title="حذف دائمی"
+                                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400"
+                                title={t('deleteStudent')}
                               >
                                 <Trash2 size={14} />
                               </button>
@@ -395,31 +400,31 @@ export const ClassManagementSheet = ({
           {showAddForm && (
             <form onSubmit={handleCreateSubmit} className="space-y-4 animate-in fade-in duration-200">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-600">ایجاد کلاس جدید</span>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{t('addNewClass')}</span>
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"
+                  className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1"
                 >
-                  <Undo2 size={12} /> بازگشت به لیست
+                  <Undo2 size={12} /> {t('list')}
                 </button>
               </div>
 
-              <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200">
+              <div className="space-y-3 bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">نام کلاس</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('className')}</label>
                   <input
                     type="text"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-bold text-sm text-slate-700 outline-none focus:border-blue-400"
-                    placeholder="مثلا کلاس ترم بهار ۱۴۰۵ 🌸"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-sm text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                    placeholder={t('classNamePlaceholder')}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1.5">ایموجی کلاس</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">{t('emoji')}</label>
                   <div className="grid grid-cols-6 gap-2">
                     {DEFAULT_EMOJIS.map((emo) => (
                       <button
@@ -428,8 +433,8 @@ export const ClassManagementSheet = ({
                         onClick={() => setNewClassEmoji(emo)}
                         className={`text-xl p-2.5 rounded-xl border transition-all ${
                           newClassEmoji === emo
-                            ? 'bg-blue-50 border-blue-400 scale-110 shadow-sm'
-                            : 'bg-slate-50 border-transparent hover:border-slate-200'
+                            ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-400 dark:border-blue-500 scale-110 shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-900 border-transparent hover:border-slate-200 dark:hover:border-slate-800'
                         }`}
                       >
                         {emo}
@@ -440,44 +445,44 @@ export const ClassManagementSheet = ({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">تاریخ شروع (اختیاری)</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('startDate')}</label>
                     <input
                       type="text"
                       value={newStartDate}
                       onChange={(e) => setNewStartDate(e.target.value)}
-                      placeholder="۱۴۰۵/۰۱/۱۵"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 outline-none focus:border-blue-400"
+                      placeholder={t('startPlaceholder')}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">تاریخ پایان (اختیاری)</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('endDate')}</label>
                     <input
                       type="text"
                       value={newEndDate}
                       onChange={(e) => setNewEndDate(e.target.value)}
-                      placeholder="۱۴۰۵/۰۳/۳۱"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 outline-none focus:border-blue-400"
+                      placeholder={t('endPlaceholder')}
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">نام اولین شاگرد (اختیاری)</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('firstStudentName')}</label>
                   <input
                     type="text"
                     value={firstStudentName}
                     onChange={(e) => setFirstStudentName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-600 outline-none focus:border-blue-400"
-                    placeholder="مثلا علیرضا حسینی"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                    placeholder={t('firstStudentPlaceholder')}
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
-                ثبت و ایجاد کلاس
+                {t('create')}
               </button>
             </form>
           )}

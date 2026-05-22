@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Pause, Volume2 } from 'lucide-react';
 import { getSurahAudioUrl } from '../../utils/helpers';
 import { AUDIO_BASE_URL } from '../../constants';
+import { translate } from '../../translations';
 
-export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast: any }) => {
+export const AudioPlayer = ({ surahId, showToast, language = 'fa' }: { surahId: number, showToast: any, language?: 'fa' | 'en' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -27,7 +28,7 @@ export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast
             console.error("Audio error:", e);
             setIsLoading(false);
             setIsPlaying(false);
-            showToast("خطا در پخش صوت", 'error');
+            showToast(translate('audioError', language), 'error');
         });
         
         audioRef.current = audio;
@@ -59,7 +60,7 @@ export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast
   }, []);
 
   return (
-    <button onClick={togglePlay} className={`p-2 rounded-full transition-all ${isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-500'}`}>
+    <button onClick={togglePlay} className={`p-2 rounded-full transition-all ${isPlaying ? 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:text-blue-500 dark:hover:text-blue-400'}`}>
         {isLoading ? (
             <Loader2 size={18} className="animate-spin text-blue-500" />
         ) : isPlaying ? (

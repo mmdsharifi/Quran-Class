@@ -39,6 +39,8 @@ test("DEFAULT_SETTINGS keeps project defaults", () => {
   assert.deepEqual(DEFAULT_SETTINGS, {
     rokhvaniDays: [6, 1, 3],
     hefzDays: [0, 2, 4, 5],
+    theme: 'system',
+    language: 'fa',
   });
 });
 
@@ -365,7 +367,7 @@ test("buildNewClass constructs a class object with unique id and defaults", () =
   assert.equal(c.emoji, "🕌");
   assert.equal(c.startDate, "2026-05-21");
   assert.equal(c.endDate, "2026-08-21");
-  assert.deepEqual(c.settings, { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5] });
+  assert.deepEqual(c.settings, { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5], theme: 'system', language: 'fa' });
   assert.deepEqual(c.students, []);
   assert.equal(c.archived, false);
 });
@@ -653,6 +655,50 @@ test("importStudentsToClass imports students and resets past data when keepData 
   assert.equal(imported.streak, 0);
   assert.deepEqual(imported.progressLog, []);
 });
+
+test("buildNewClass constructs settings with custom theme and language", () => {
+  const c = buildNewClass({
+    name: "Custom Settings Class",
+    id: "custom-class-1",
+    settings: {
+      rokhvaniDays: [1, 3],
+      hefzDays: [2, 4],
+      theme: "dark",
+      language: "en",
+    },
+  });
+
+  assert.equal(c.settings.theme, "dark");
+  assert.equal(c.settings.language, "en");
+});
+
+test("updateClassInList updates class theme and language settings correctly", () => {
+  const classes = [
+    {
+      id: "class-1",
+      name: "Class 1",
+      settings: {
+        rokhvaniDays: [6, 1, 3],
+        hefzDays: [0, 2, 4, 5],
+        theme: "system",
+        language: "fa",
+      },
+    },
+  ];
+
+  const updated = updateClassInList(classes, "class-1", {
+    settings: {
+      rokhvaniDays: [6, 1, 3],
+      hefzDays: [0, 2, 4, 5],
+      theme: "light",
+      language: "en",
+    },
+  });
+
+  assert.equal(updated[0].settings.theme, "light");
+  assert.equal(updated[0].settings.language, "en");
+});
+
 
 
 
