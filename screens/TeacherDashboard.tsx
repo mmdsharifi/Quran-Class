@@ -378,7 +378,7 @@ export const TeacherDashboard = ({
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 text-[11px] font-bold text-slate-300 flex flex-col gap-2">
           <div className="flex justify-between items-center text-[10px] text-slate-400/80 font-normal">
             <span>{t('appVersion')}</span>
-            <span>v0.3.0</span>
+            <span>{__APP_VERSION__}</span>
           </div>
           {activeClass?.startDate && (
             <div className="flex justify-between items-center border-t border-slate-700 pt-2">
