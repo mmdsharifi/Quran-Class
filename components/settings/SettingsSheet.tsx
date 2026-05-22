@@ -277,7 +277,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                          </button>
                     </div>
 
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{APP_VERSION} - {APP_LAST_UPDATE}</span>
                         <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 px-2 py-1 rounded-md">
                             <RefreshCw size={10} />

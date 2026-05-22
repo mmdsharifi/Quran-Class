@@ -135,7 +135,7 @@ export const ImportStudentSheet = ({
                           key={student.id}
                           className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/40 shadow-sm'
+                              ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900 shadow-sm'
                               : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-900'
                           }`}
                         >
