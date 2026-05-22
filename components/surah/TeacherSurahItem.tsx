@@ -4,8 +4,23 @@ import { Surah, Student } from '../../types';
 import { QURAN_TEXT, SFX_CLICK, SFX_MEMORIZED, SFX_SUCCESS } from '../../constants';
 import { calculateMemoryHealth, playSound } from '../../utils/helpers';
 import { AudioPlayer } from './AudioPlayer';
+import { translate } from '../../translations';
 
-const TeacherSurahItemComponent: React.FC<{ surah: Surah, student: Student, mode: 'recitation' | 'memorization', onUpdateProgress: any, showToast: any }> = ({ surah, student, mode, onUpdateProgress, showToast }) => {
+const TeacherSurahItemComponent: React.FC<{ 
+  surah: Surah; 
+  student: Student; 
+  mode: 'recitation' | 'memorization'; 
+  onUpdateProgress: any; 
+  showToast: any;
+  language?: 'fa' | 'en';
+}> = ({ 
+  surah, 
+  student, 
+  mode, 
+  onUpdateProgress, 
+  showToast,
+  language = 'fa'
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showText, setShowText] = useState(false);
   const progressData = mode === 'recitation' ? student.ayahProgress : student.memorizationProgress;
@@ -25,61 +40,63 @@ const TeacherSurahItemComponent: React.FC<{ surah: Surah, student: Student, mode
     playSound(SFX_CLICK);
     onUpdateProgress(student.id, surah.id, newCompleted, mode);
   };
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => translate(key, language, params);
+
   const handleFullComplete = () => { 
       playSound(mode === 'memorization' ? SFX_MEMORIZED : SFX_SUCCESS); 
       onUpdateProgress(student.id, surah.id, ayahsList, mode, true); 
-      showToast(mode === 'memorization' ? 'حفظ کامل سوره ثبت شد +۱ ✨🤲🏻' : 'روخوانی کامل شد +۱ ✨🤲🏻', 'success');
+      showToast(mode === 'memorization' ? t('fullMemorizationLogged') : t('fullRecitationLogged'), 'success');
   };
 
   return (
-    <div className={`rounded-xl border-b-4 transition-colors overflow-hidden ${isFullyCompleted ? (mode === 'recitation' ? 'bg-green-50 border-green-200' : 'bg-purple-50 border-purple-200') : 'bg-white border-slate-100'}`}>
-      <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => setIsOpen(!isOpen)}>
+    <div className={`rounded-xl border-b-4 transition-colors overflow-hidden ${isFullyCompleted ? (mode === 'recitation' ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/40' : 'bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-900/40') : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
+      <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/45 transition-colors" onClick={() => setIsOpen(!isOpen)}>
         <div className="flex items-center gap-3">
-           <AudioPlayer surahId={surah.id} showToast={showToast} />
+           <AudioPlayer surahId={surah.id} showToast={showToast} language={language} />
            <div>
-            <div className="font-bold text-slate-700 text-lg flex items-center gap-2">
-              سوره {surah.name}
-              {isFullyCompleted && (mode === 'memorization' ? <span className="text-xl">👑</span> : <Check size={16} className="text-green-500" />)}
+            <div className="font-bold text-slate-700 dark:text-slate-200 text-lg flex items-center gap-2">
+              {language === 'en' ? `${t('surahLabel')} ${surah.nameEn}` : `${t('surahLabel')} ${surah.name}`}
+              {isFullyCompleted && (mode === 'memorization' ? <span className="text-xl">👑</span> : <Check size={16} className="text-green-500 dark:text-green-400" />)}
             </div>
-            <div className="text-xs text-slate-400 font-arabic flex gap-2"><span>{surah.nameAr}</span> • <span>{completedAyahs.length}/{surah.ayahs} آیه</span></div>
+            <div className="text-xs text-slate-400 dark:text-slate-550 font-arabic flex gap-2"><span>{surah.nameAr}</span> • <span>{completedAyahs.length}/{surah.ayahs} {surah.ayahs === 1 ? t('ayah') : t('ayahs')}</span></div>
            </div>
         </div>
         <div className="flex items-center gap-3">
-           {memoryStatus && (memoryStatus.status === 'warning' || memoryStatus.status === 'critical') && (<div className="bg-red-100 text-red-500 text-[10px] px-2 py-1 rounded-full font-bold flex items-center gap-1 animate-pulse"><RefreshCw size={10} /> مرور!</div>)}
-           {!isFullyCompleted && <div className={`text-xs font-bold ${themeText} bg-white px-2 py-1 rounded-lg border`}>{Math.round((completedAyahs.length / surah.ayahs) * 100)}%</div>}
-           {isOpen ? <ChevronUp size={20} className="text-slate-300" /> : <ChevronDown size={20} className="text-slate-300" />}
+           {memoryStatus && (memoryStatus.status === 'warning' || memoryStatus.status === 'critical') && (<div className="bg-red-100 dark:bg-red-950/30 text-red-500 dark:text-red-400 text-[10px] px-2 py-1 rounded-full font-bold flex items-center gap-1 animate-pulse"><RefreshCw size={10} /> {t('reviewAction')}</div>)}
+           {!isFullyCompleted && <div className={`text-xs font-bold ${themeText} bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700`}>{Math.round((completedAyahs.length / surah.ayahs) * 100)}%</div>}
+           {isOpen ? <ChevronUp size={20} className="text-slate-300 dark:text-slate-650" /> : <ChevronDown size={20} className="text-slate-300 dark:text-slate-650" />}
         </div>
       </div>
       {isOpen && (
-        <div className="p-4 bg-slate-50 border-t border-slate-100">
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
            <div className="flex justify-center mb-4">
-              <button onClick={() => setShowText(!showText)} className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-colors font-bold">
-                 <Book size={14} /> {showText ? 'مخفی کردن متن' : 'مشاهده متن سوره'}
+              <button onClick={() => setShowText(!showText)} className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full transition-colors font-bold">
+                 <Book size={14} /> {showText ? t('hideText') : t('viewText')}
               </button>
            </div>
            {showText && (
-             <div className="mb-4 bg-amber-50 p-4 rounded-xl border border-amber-100 text-center relative">
-                <div className="text-2xl text-slate-800 leading-loose font-quran" dir="rtl">{QURAN_TEXT[surah.id] || "..."}</div>
-                <div className="text-[10px] text-amber-400 mt-2">رسم‌الخط عثمان‌طه</div>
+             <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30 text-center relative">
+                <div className="text-2xl text-slate-800 dark:text-amber-100/90 leading-loose font-quran" dir="rtl">{QURAN_TEXT[surah.id] || "..."}</div>
+                <div className="text-[10px] text-amber-500/80 dark:text-amber-500/50 mt-2">{t('uthmaniScript')}</div>
              </div>
            )}
            {memoryStatus && (
-               <div className="mb-3 bg-white p-3 rounded-lg border border-slate-200">
+               <div className="mb-3 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
                    <div className="flex items-center justify-between mb-2">
-                     <div className="text-xs text-slate-500 flex items-center gap-1">وضعیت حافظه: <span className={`font-bold ${memoryStatus.color}`}>{memoryStatus.health}%</span></div>
-                     <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full ${memoryStatus.barColor}`} style={{width: `${memoryStatus.health}%`}}></div></div>
+                     <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">{t('memoryStatus')} <span className={`font-bold ${memoryStatus.color}`}>{memoryStatus.health}%</span></div>
+                     <div className="w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className={`h-full ${memoryStatus.barColor}`} style={{width: `${memoryStatus.health}%`}}></div></div>
                    </div>
                    
                    {reviewHistory.length > 0 && (
-                      <div className="border-t border-slate-100 pt-2 mt-2">
-                          <div className="text-[10px] font-bold text-slate-400 mb-2 flex items-center gap-1">
-                              <History size={10} /> تاریخچه مرور:
+                      <div className="border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
+                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-550 mb-2 flex items-center gap-1">
+                              <History size={10} /> {t('reviewHistory')}
                           </div>
                           <div className="space-y-1">
                               {reviewHistory.map((ts, idx) => (
-                                  <div key={idx} className="flex justify-between items-center text-[10px] text-slate-500 bg-slate-50 p-1.5 rounded">
-                                      <span className="font-bold">{idx + 1}. {new Date(ts).toLocaleDateString('fa-IR')}</span>
-                                      <span className="text-slate-400">{new Date(ts).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <div key={idx} className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 p-1.5 rounded">
+                                      <span className="font-bold">{idx + 1}. {new Date(ts).toLocaleDateString(language === 'en' ? 'en-US' : 'fa-IR')}</span>
+                                      <span className="text-slate-400 dark:text-slate-500">{new Date(ts).toLocaleTimeString(language === 'en' ? 'en-US' : 'fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
                                   </div>
                               ))}
                           </div>
@@ -105,6 +122,7 @@ export const TeacherSurahItem = React.memo(TeacherSurahItemComponent, (prevProps
   if (prevProps.mode !== nextProps.mode) return false;
   if (prevProps.onUpdateProgress !== nextProps.onUpdateProgress) return false;
   if (prevProps.showToast !== nextProps.showToast) return false;
+  if (prevProps.language !== nextProps.language) return false;
 
   const prevStudent = prevProps.student;
   const nextStudent = nextProps.student;

@@ -59,6 +59,14 @@ const App = () => {
     }
   }, [settings.theme]);
 
+  // Dynamic language/direction resolver
+  React.useEffect(() => {
+    const lang = settings.language || 'fa';
+    const root = document.documentElement;
+    root.dir = lang === 'en' ? 'ltr' : 'rtl';
+    root.lang = lang;
+  }, [settings.language]);
+
   return (
     <>
       <ToastContainer toasts={toasts} />

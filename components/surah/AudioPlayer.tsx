@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Pause, Volume2 } from 'lucide-react';
 import { getSurahAudioUrl } from '../../utils/helpers';
 import { AUDIO_BASE_URL } from '../../constants';
+import { translate } from '../../translations';
 
-export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast: any }) => {
+export const AudioPlayer = ({ surahId, showToast, language = 'fa' }: { surahId: number, showToast: any, language?: 'fa' | 'en' }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -27,7 +28,7 @@ export const AudioPlayer = ({ surahId, showToast }: { surahId: number, showToast
             console.error("Audio error:", e);
             setIsLoading(false);
             setIsPlaying(false);
-            showToast("خطا در پخش صوت", 'error');
+            showToast(translate('audioError', language), 'error');
         });
         
         audioRef.current = audio;

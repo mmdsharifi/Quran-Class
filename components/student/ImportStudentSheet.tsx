@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { X, Check, Users, HelpCircle } from 'lucide-react';
 import { QuranClass, Student } from '../../types';
+import { translate } from '../../translations';
 
 export const ImportStudentSheet = ({
   classes,
   activeClassId,
+  language = 'fa',
   onClose,
   onImport,
   showToast,
 }: {
   classes: QuranClass[];
   activeClassId: string;
+  language?: 'fa' | 'en';
   onClose: () => void;
   onImport: (selectedStudents: Student[], keepData: boolean) => void;
   showToast: any;
@@ -22,6 +25,8 @@ export const ImportStudentSheet = ({
 
   const selectedClass = classes.find((c) => c.id === selectedClassId);
   const sourceStudents = selectedClass ? selectedClass.students : [];
+
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => translate(key, language, params);
 
   const handleToggleStudent = (id: number) => {
     setSelectedStudentIds((prev) =>
@@ -40,7 +45,7 @@ export const ImportStudentSheet = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedStudentIds.length === 0) {
-      showToast('لطفاً حداقل یک شاگرد را انتخاب کنید', 'error');
+      showToast(t('importEmpty'), 'error');
       return;
     }
 
@@ -49,7 +54,7 @@ export const ImportStudentSheet = ({
     );
 
     onImport(studentsToImport, keepData);
-    showToast(`${studentsToImport.length} شاگرد با موفقیت وارد شدند`, 'success');
+    showToast(t('importSuccess', { count: studentsToImport.length }), 'success');
   };
 
   return (

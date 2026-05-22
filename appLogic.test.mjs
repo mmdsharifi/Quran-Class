@@ -40,6 +40,7 @@ test("DEFAULT_SETTINGS keeps project defaults", () => {
     rokhvaniDays: [6, 1, 3],
     hefzDays: [0, 2, 4, 5],
     theme: 'system',
+    language: 'fa',
   });
 });
 
@@ -366,7 +367,7 @@ test("buildNewClass constructs a class object with unique id and defaults", () =
   assert.equal(c.emoji, "🕌");
   assert.equal(c.startDate, "2026-05-21");
   assert.equal(c.endDate, "2026-08-21");
-  assert.deepEqual(c.settings, { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5], theme: 'system' });
+  assert.deepEqual(c.settings, { rokhvaniDays: [6, 1, 3], hefzDays: [0, 2, 4, 5], theme: 'system', language: 'fa' });
   assert.deepEqual(c.students, []);
   assert.equal(c.archived, false);
 });

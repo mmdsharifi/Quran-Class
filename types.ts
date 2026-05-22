@@ -2,6 +2,7 @@ export interface Surah {
   id: number;
   name: string;
   nameAr: string;
+  nameEn: string;
   ayahs: number;
 }
 
@@ -50,6 +51,7 @@ export interface AppSettings {
   rokhvaniDays: number[];
   hefzDays: number[];
   theme?: 'light' | 'dark' | 'system';
+  language?: 'fa' | 'en';
 }
 
 export interface QuranClass {

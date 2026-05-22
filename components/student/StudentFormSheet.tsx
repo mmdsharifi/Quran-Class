@@ -1,18 +1,39 @@
 import React, { useState } from 'react';
 import { X, Minus, Plus, Check, Trash2 } from 'lucide-react';
 import { Student } from '../../types';
+import { translate } from '../../translations';
 
-export const StudentFormSheet = ({ student, onSave, onDelete, onClose, onOpenImport, showToast, confirm }: { student: Student | null, onSave: (s: any) => void, onDelete: (id: number) => void, onClose: () => void, onOpenImport: () => void, showToast: any, confirm: any }) => {
+export const StudentFormSheet = ({ 
+  student, 
+  language = 'fa',
+  onSave, 
+  onDelete, 
+  onClose, 
+  onOpenImport, 
+  showToast, 
+  confirm 
+}: { 
+  student: Student | null;
+  language?: 'fa' | 'en';
+  onSave: (s: any) => void;
+  onDelete: (id: number) => void;
+  onClose: () => void;
+  onOpenImport: () => void;
+  showToast: any;
+  confirm: any;
+}) => {
   const [name, setName] = useState(student ? student.name : '');
   const [note, setNote] = useState(student ? student.note || '' : '');
   const [diamonds, setDiamonds] = useState(student ? student.diamonds : 0);
   const [stars, setStars] = useState(student ? student.stars : 0);
   const [pluses, setPluses] = useState(student ? student.pluses : 0);
 
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => translate(key, language, params);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({ ...student, name, note, diamonds: Number(diamonds), stars: Number(stars), pluses: Number(pluses) });
-    showToast(student ? 'تغییرات ذخیره شد' : 'شاگرد جدید افزوده شد', 'success');
+    showToast(student ? t('studentUpdated') : t('studentAdded'), 'success');
   };
 
   return (

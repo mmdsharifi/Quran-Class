@@ -3,6 +3,7 @@ import { Edit, Settings, ThumbsUp, ThumbsDown, ChevronRight, StickyNote, Refresh
 import { playSound, calculateMemoryHealth } from '../../utils/helpers';
 import { SFX_CLICK } from '../../constants';
 import { Student } from '../../types';
+import { translate } from '../../translations';
 
 interface StudentListItemProps {
   student: Student;
@@ -20,6 +21,7 @@ interface StudentListItemProps {
   onSelect: (studentId: number) => void;
   onEdit: (student: Student) => void;
   onManualPoint: (studentId: number, type: 'positive' | 'negative') => void;
+  language: 'fa' | 'en';
 }
 
 export const StudentListItem: React.FC<StudentListItemProps> = ({
@@ -32,7 +34,9 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
   onSelect,
   onEdit,
   onManualPoint,
+  language,
 }) => {
+  const t = (key: Parameters<typeof translate>[0]) => translate(key, language);
   const cardRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const leftBgRef = useRef<HTMLDivElement>(null);
@@ -257,7 +261,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
         >
           <div className="flex items-center gap-2">
             <ThumbsUp size={24} className="animate-bounce" />
-            <span className="text-sm font-bold" dir="rtl">تشویق (۱+)</span>
+            <span className="text-sm font-bold">{t('praise')}</span>
           </div>
         </div>
 
@@ -267,7 +271,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
           className="absolute inset-0 bg-gradient-to-l from-red-500 to-red-400 flex items-center justify-end px-6 text-white font-bold opacity-0 transition-opacity duration-150"
         >
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold" dir="rtl">تذکر (۱-)</span>
+            <span className="text-sm font-bold">{t('warn')}</span>
             <ThumbsDown size={24} className="animate-bounce" />
           </div>
         </div>
@@ -390,16 +394,16 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                   calculateMemoryHealth(student.lastReview?.[Number(id)]).status ===
                   'critical'
               ) ? (
-              <div className="bg-red-50 text-red-500 p-2 rounded-full animate-pulse">
+              <div className="bg-red-50 dark:bg-red-950/35 text-red-500 dark:text-red-400 p-2 rounded-full animate-pulse">
                 <RefreshCw size={14} />
               </div>
             ) : (
-              <ChevronRight className="text-slate-300 group-hover:-translate-x-1 transition-transform" />
+              <ChevronRight className="text-slate-300 dark:text-slate-600 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1 transition-transform" />
             )}
           </div>
           {!isEditMode && student.note && (
-            <div className="mt-2 text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg flex items-start gap-1 w-full text-right border border-slate-100">
-              <StickyNote size={10} className="mt-0.5 text-slate-400 shrink-0" />
+            <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg flex items-start gap-1 w-full text-start border border-slate-100 dark:border-slate-800/80">
+              <StickyNote size={10} className="mt-0.5 text-slate-400 dark:text-slate-500 shrink-0" />
               {student.note}
             </div>
           )}

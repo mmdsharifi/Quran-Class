@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { X, Check, Edit, Trash2, Calendar, BookOpen, Plus, Save, Undo2, Archive, ArchiveRestore, ChevronRight } from 'lucide-react';
 import { QuranClass } from '../../types';
+import { translate } from '../../translations';
 
 interface ClassManagementSheetProps {
   classes: QuranClass[];
   activeClassId: string;
+  language: 'fa' | 'en';
   onSelectClass: (id: string) => void;
   onCreateClass: (
     name: string,
@@ -26,6 +28,7 @@ const DEFAULT_EMOJIS = ['🕌', '🕋', '🍁', '🌸', '📚', '🌟', '✏️'
 export const ClassManagementSheet = ({
   classes,
   activeClassId,
+  language,
   onSelectClass,
   onCreateClass,
   onEditClass,
@@ -54,6 +57,8 @@ export const ClassManagementSheet = ({
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
 
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => translate(key, language, params);
+
   const handleStartEdit = (c: QuranClass, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent class switching click
     setEditingClassId(c.id);
@@ -66,7 +71,7 @@ export const ClassManagementSheet = ({
   const handleSaveEdit = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!editName.trim()) {
-      showToast('نام کلاس نمی‌تواند خالی باشد', 'error');
+      showToast(t('classNameNotEmpty'), 'error');
       return;
     }
     onEditClass(id, {
@@ -76,7 +81,7 @@ export const ClassManagementSheet = ({
       endDate: editEndDate,
     });
     setEditingClassId(null);
-    showToast('مشخصات کلاس بروزرسانی شد', 'success');
+    showToast(t('classUpdated'), 'success');
   };
 
   const handleCancelEdit = (e: React.MouseEvent) => {
@@ -90,19 +95,19 @@ export const ClassManagementSheet = ({
     const isTargetActive = targetClass ? !targetClass.archived : false;
 
     if (classes.length <= 1) {
-      showToast('حداقل باید یک کلاس در سیستم وجود داشته باشد', 'error');
+      showToast(t('atLeastOneClass'), 'error');
       return;
     }
     if (isTargetActive && activeClasses.length <= 1) {
-      showToast('حداقل باید یک کلاس فعال داشته باشید', 'error');
+      showToast(t('atLeastOneActiveClass'), 'error');
       return;
     }
     confirm(
-      'حذف کلاس',
-      `آیا از حذف کلاس "${name}" اطمینان دارید؟ تمامی اطلاعات مربوط به دانش‌آموزان این کلاس به طور کامل حذف خواهد شد.`,
+      t('deleteClassConfirmTitle'),
+      t('deleteClassConfirmDesc', { name }),
       () => {
         onDeleteClass(id);
-        showToast('کلاس با موفقیت حذف شد', 'success');
+        showToast(t('classDeleted'), 'success');
       },
       true
     );
@@ -111,15 +116,15 @@ export const ClassManagementSheet = ({
   const handleArchive = (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (activeClasses.length <= 1) {
-      showToast('حداقل باید یک کلاس فعال داشته باشید', 'error');
+      showToast(t('atLeastOneActiveClass'), 'error');
       return;
     }
     confirm(
-      'بایگانی کلاس',
-      `آیا از بایگانی کردن کلاس "${name}" اطمینان دارید؟`,
+      t('archiveClassConfirmTitle'),
+      t('archiveClassConfirmDesc', { name }),
       () => {
         onArchiveClass(id, true);
-        showToast('کلاس با موفقیت بایگانی شد', 'success');
+        showToast(t('classArchivedSuccess'), 'success');
       }
     );
   };
@@ -127,13 +132,13 @@ export const ClassManagementSheet = ({
   const handleRestore = (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     onArchiveClass(id, false);
-    showToast(`کلاس "${name}" با موفقیت بازیابی شد`, 'success');
+    showToast(t('classRestored', { name }), 'success');
   };
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newClassName.trim()) {
-      showToast('نام کلاس الزامی است', 'error');
+      showToast(t('classNameRequired'), 'error');
       return;
     }
     onCreateClass(
@@ -143,7 +148,7 @@ export const ClassManagementSheet = ({
       newEndDate,
       firstStudentName.trim()
     );
-    showToast('کلاس جدید با موفقیت ایجاد شد', 'success');
+    showToast(t('classCreated'), 'success');
     // Reset Form
     setNewClassName('');
     setNewClassEmoji('🕌');

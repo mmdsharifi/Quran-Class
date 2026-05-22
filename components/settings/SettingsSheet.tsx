@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Settings, X, Calendar, Upload, FileDown, Trash2, RefreshCw } from 'lucide-react';
 import { AppSettings, Student } from '../../types';
 import { parseCSVLine } from '../../utils/helpers';
+import { translate } from '../../translations';
 
 const APP_VERSION = __APP_VERSION__;
 const APP_LAST_UPDATE = __APP_LAST_UPDATE__;
@@ -16,18 +17,22 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
     showToast: (m: string, t: 'success' | 'error') => void,
     confirm: (t: string, m: string, cb: () => void, danger?: boolean) => void
 }) => {
-    const days = [
-        { id: 6, label: 'شنبه' },
-        { id: 0, label: 'یک‌شنبه' },
-        { id: 1, label: 'دوشنبه' },
-        { id: 2, label: 'سه‌شنبه' },
-        { id: 3, label: 'چهارشنبه' },
-        { id: 4, label: 'پنج‌شنبه' },
-        { id: 5, label: 'جمعه' },
-    ];
-
     const [localSettings, setLocalSettings] = useState(settings);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const lang = localSettings.language || 'fa';
+    const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) => 
+        translate(key, lang, params);
+
+    const days = [
+        { id: 6, label: t('saturday') },
+        { id: 0, label: t('sunday') },
+        { id: 1, label: t('monday') },
+        { id: 2, label: t('tuesday') },
+        { id: 3, label: t('wednesday') },
+        { id: 4, label: t('thursday') },
+        { id: 5, label: t('friday') },
+    ];
 
     const toggleDay = (dayId: number, type: 'rokhvani' | 'hefz') => {
         setLocalSettings(prev => {
@@ -69,9 +74,10 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `quran-tracker-${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.csv`;
+        const dateStr = new Date().toLocaleDateString(lang === 'en' ? 'en-US' : 'fa-IR').replace(/\//g, '-');
+        link.download = `quran-tracker-${dateStr}.csv`;
         link.click();
-        showToast('فایل خروجی ساخته شد', 'success');
+        showToast(t('csvExportSuccess'), 'success');
     };
 
     const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +89,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
             try {
                 const text = evt.target?.result as string;
                 const lines = text.split('\n').filter(l => l.trim() !== '');
-                if (lines.length < 2) { showToast('فایل خالی یا نامعتبر است', 'error'); return; }
+                if (lines.length < 2) { showToast(t('csvRestoreInvalid'), 'error'); return; }
                 
                 const dataLines = lines.slice(1);
                 const parsedStudents: Student[] = dataLines.map(line => {
@@ -124,21 +130,21 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
 
                 if (parsedStudents.length > 0) {
                     confirm(
-                        'بازنشانی اطلاعات', 
-                        `تعداد ${parsedStudents.length} رکورد پیدا شد. آیا مطمئن هستید که جایگزین شوند؟ تمام داده‌های فعلی از بین می‌روند.`,
+                        t('resetDataConfirmTitle'), 
+                        t('resetDataConfirmDesc', { count: parsedStudents.length }),
                         () => {
                             onImport(parsedStudents);
                             onClose();
-                            showToast('اطلاعات با موفقیت بازیابی شد', 'success');
+                            showToast(t('csvRestoreSuccess'), 'success');
                         },
                         true
                     );
                 } else {
-                    showToast('هیچ داده معتبری یافت نشد', 'error');
+                    showToast(t('csvRestoreEmpty'), 'error');
                 }
             } catch (err) {
                 console.error(err);
-                showToast('خطا در پردازش فایل CSV', 'error');
+                showToast(t('csvRestoreError'), 'error');
             }
             if (fileInputRef.current) fileInputRef.current.value = '';
         };
@@ -191,41 +197,91 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-bold text-slate-500 mb-3 flex items-center gap-2"><Upload size={16}/> مدیریت داده‌ها</h3>
-                        <div className="bg-white rounded-2xl border border-slate-200 p-2 grid grid-cols-2 gap-2">
-                             <button onClick={handleExportCSV} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 gap-2 transition-colors border border-slate-100">
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                            <span className="text-sm">🎨</span> {t('appTheme')}
+                        </h3>
+                        <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-2 flex gap-1">
+                            {(['system', 'light', 'dark'] as const).map((themeMode) => {
+                                const isActive = (localSettings.theme || 'system') === themeMode;
+                                return (
+                                    <button
+                                        key={themeMode}
+                                        type="button"
+                                        onClick={() => setLocalSettings(prev => ({ ...prev, theme: themeMode }))}
+                                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                                            isActive
+                                                ? 'bg-blue-600 text-white shadow-md'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
+                                        }`}
+                                    >
+                                        {t(themeMode)}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                            <span className="text-sm">🌐</span> {t('appLanguage')}
+                        </h3>
+                        <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-2 flex gap-1">
+                            {(['fa', 'en'] as const).map((l) => {
+                                const isActive = (localSettings.language || 'fa') === l;
+                                return (
+                                    <button
+                                        key={l}
+                                        type="button"
+                                        onClick={() => setLocalSettings(prev => ({ ...prev, language: l }))}
+                                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                                            isActive
+                                                ? 'bg-blue-600 text-white shadow-md'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
+                                        }`}
+                                    >
+                                        {t(l)}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2"><Upload size={16}/> {t('dataManagement')}</h3>
+                        <div className="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-2 grid grid-cols-2 gap-2">
+                             <button onClick={handleExportCSV} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 gap-2 transition-colors border border-slate-100 dark:border-slate-850">
                                 <FileDown size={24} className="text-blue-500"/>
-                                <span className="text-xs font-bold">خروجی CSV</span>
+                                <span className="text-xs font-bold">{t('exportCsv')}</span>
                              </button>
-                             <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 gap-2 transition-colors border border-slate-100">
+                             <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 gap-2 transition-colors border border-slate-100 dark:border-slate-850">
                                 <Upload size={24} className="text-green-500"/>
-                                <span className="text-xs font-bold">ایمپورت CSV</span>
+                                <span className="text-xs font-bold">{t('importCsv')}</span>
                              </button>
                              <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
                         </div>
                     </div>
 
-                    <button onClick={() => { onSave(localSettings); onClose(); showToast('تنظیمات ذخیره شد', 'success'); }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform">
-                        ذخیره تنظیمات
+                    <button onClick={() => { onSave(localSettings); onClose(); showToast(t('settingsSaved'), 'success'); }} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none active:scale-95 transition-transform">
+                        {t('saveSettings')}
                     </button>
 
-                    <div className="pt-4 border-t border-slate-200">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
                          <button onClick={() => { 
-                             confirm('حذف کل داده‌ها', 'هشدار: آیا مطمئن هستید که می‌خواهید تمام داده‌ها را حذف کنید؟ این عملیات غیرقابل بازگشت است.', () => {
-                                 onReset();
-                                 onClose();
-                                 showToast('داده‌ها حذف شدند', 'success');
-                             }, true);
-                         }} className="w-full flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 p-3 rounded-xl border border-red-200 font-bold text-sm active:scale-95 transition-transform">
-                             <Trash2 size={18} /> حذف تمام داده‌ها و شروع مجدد
+                              confirm(t('resetDataWarningTitle'), t('resetDataWarningDesc'), () => {
+                                  onReset();
+                                  onClose();
+                                  showToast(t('dataDeleted'), 'success');
+                              }, true);
+                          }} className="w-full flex items-center justify-center gap-2 text-red-500 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-900/35 font-bold text-sm active:scale-95 transition-transform">
+                              <Trash2 size={18} /> {t('resetAllData')}
                          </button>
                     </div>
 
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
+                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
                         <span className="text-[10px] text-slate-400 font-mono">{APP_VERSION} - {APP_LAST_UPDATE}</span>
-                        <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 hover:underline flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
+                        <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 px-2 py-1 rounded-md">
                             <RefreshCw size={10} />
-                            بروزرسانی برنامه
+                            {t('updateApp')}
                         </button>
                     </div>
                 </div>

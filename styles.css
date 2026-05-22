@@ -18,6 +18,10 @@ body {
   font-family: "Amiri", "Scheherazade New", serif;
 }
 
+html[lang="en"] *:not(.font-quran):not(.font-arabic) {
+  font-family: 'Inter', 'ui-sans-serif', 'system-ui', sans-serif !important;
+}
+
 @keyframes bounce-slow {
   0%,
   100% {
