@@ -179,13 +179,13 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                                         <div className="flex gap-2">
                                             <button 
                                                 onClick={() => toggleDay(day.id, 'rokhvani')}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isRokhvani ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-850'}`}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isRokhvani ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-850'}`}
                                             >
                                                 {t('recitation')}
                                             </button>
                                             <button 
                                                 onClick={() => toggleDay(day.id, 'hefz')}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isHefz ? 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-850'}`}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${isHefz ? 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-900/40' : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-850'}`}
                                             >
                                                 {t('memorization')}
                                             </button>
@@ -211,7 +211,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                                         className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                                             isActive
                                                 ? 'bg-blue-600 text-white shadow-md'
-                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
                                         }`}
                                     >
                                         {t(themeMode)}
@@ -236,7 +236,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                                         className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                                             isActive
                                                 ? 'bg-blue-600 text-white shadow-md'
-                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
                                         }`}
                                     >
                                         {t(l)}
@@ -278,7 +278,7 @@ export const SettingsSheet = ({ settings, students, onSave, onImport, onReset, o
                     </div>
 
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-                        <span className="text-[10px] text-slate-400 font-mono">{APP_VERSION} - {APP_LAST_UPDATE}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{APP_VERSION} - {APP_LAST_UPDATE}</span>
                         <button onClick={() => window.location.reload()} className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 px-2 py-1 rounded-md">
                             <RefreshCw size={10} />
                             {t('updateApp')}

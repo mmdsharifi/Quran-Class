@@ -355,7 +355,7 @@ export const TeacherDashboard = ({
         </div>
 
         {/* Footer stats */}
-        <div className="bg-slate-800 border border-slate-700/30 rounded-2xl p-4 text-[11px] font-bold text-slate-400 flex flex-col gap-2">
+        <div className="bg-slate-800 border border-slate-700/30 rounded-2xl p-4 text-[11px] font-bold text-slate-300 flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <span>{t('classStudentsCount')}</span>
             <span className="text-slate-200">{students.length} {t('persons')}</span>
@@ -384,9 +384,9 @@ export const TeacherDashboard = ({
                            <h2 className="text-xl font-black text-slate-700 dark:text-slate-100 flex items-center gap-1.5">
                              <span>{classEmoji}</span>
                              <span className="truncate max-w-[180px]">{className}</span>
-                             <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 rotate-90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                             <ChevronRight size={16} className="text-slate-500 dark:text-slate-400 rotate-90 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                            </h2>
-                           <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1.5">
+                           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
                              <span>{t('studentsLabel')} {students.length} {t('persons')}</span>
                              {activeClass?.startDate && (
                                <>
@@ -398,7 +398,7 @@ export const TeacherDashboard = ({
                         </button>
                         <button 
                             onClick={() => setIsEditMode(!isEditMode)} 
-                            className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-550 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                            className={`p-3 rounded-xl transition-all ${isEditMode ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                          >
                             {isEditMode ? <Check size={20} /> : <Edit size={20} />}
                          </button>
@@ -408,12 +408,12 @@ export const TeacherDashboard = ({
                            {searchQuery ? (
                              <button 
                                onClick={() => setSearchQuery('')}
-                               className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 p-1"
+                               className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 p-1"
                              >
                                <X size={18} />
                              </button>
                            ) : (
-                             <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" size={18} />
+                             <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" size={18} />
                            )}
                            <input 
                              ref={searchInputRef}
@@ -421,7 +421,7 @@ export const TeacherDashboard = ({
                              value={searchQuery}
                              onChange={(e) => setSearchQuery(e.target.value)}
                              placeholder={t('searchPlaceholder')} 
-                             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 ps-10 pe-4 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:focus:ring-blue-500 transition-all shadow-sm"
+                             className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 ps-10 pe-4 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 dark:focus:ring-blue-500 transition-all shadow-sm"
                            />
                       </div>
 
@@ -452,7 +452,7 @@ export const TeacherDashboard = ({
                            <span className="flex items-center gap-2"><Trophy size={14} className="text-yellow-500"/> {isEditMode ? t('editStudents') : t('classLeaderboard')}</span>
                         </p>
                         {filteredStudents.length === 0 ? (
-                           <div className="text-center py-10 text-slate-400">
+                           <div className="text-center py-10 text-slate-500 dark:text-slate-400">
                               <p>{t('noStudentFound')}</p>
                            </div>
                         ) : filteredStudents.map((student) => {
@@ -509,7 +509,7 @@ export const TeacherDashboard = ({
 
                              <div className="flex items-center gap-2 z-20 shrink-0">
                                 <button onClick={goToPrevStudent} disabled={activeStudentIndex === 0} className={`p-2 rounded-xl border ${activeStudentIndex === 0 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-855'}`}>{language === 'fa' ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}</button>
-                                <span className={`text-xs font-bold transition-colors text-slate-400 dark:text-slate-500`}>{activeStudentIndex + 1} / {students.length}</span>
+                                <span className={`text-xs font-bold transition-colors text-slate-500 dark:text-slate-400`}>{activeStudentIndex + 1} / {students.length}</span>
                                 <button onClick={goToNextStudent} disabled={activeStudentIndex === sortedStudents.length - 1} className={`p-2 rounded-xl border ${activeStudentIndex === sortedStudents.length - 1 ? 'bg-slate-200 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border-transparent' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-855'}`}>{language === 'fa' ? <ChevronLeft size={20}/> : <ChevronRight size={20}/>}</button>
                              </div>
                           </div>
@@ -536,7 +536,7 @@ export const TeacherDashboard = ({
                                   </div>
                                   <div className="text-center ms-8">
                                      <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-1">{activeStudent.streak} <Flame size={20} className="fill-current" /></div>
-                                     <div className="text-[10px] text-slate-400">{t('streak')}</div>
+                                     <div className="text-[10px] text-slate-300">{t('streak')}</div>
                                   </div>
                                 </div>
                                 
@@ -553,7 +553,7 @@ export const TeacherDashboard = ({
                                 )}
 
                                 <div className="mb-4">
-                                    <div className="flex justify-between text-xs text-slate-400 mb-1"><span>{t('positiveScore')}</span><span>{activeStudent.pluses}/5</span></div>
+                                    <div className="flex justify-between text-xs text-slate-300 mb-1"><span>{t('positiveScore')}</span><span>{activeStudent.pluses}/5</span></div>
                                     <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden"><div className="bg-green-400 h-full transition-all duration-300 ease-out" style={{ width: `${(activeStudent.pluses / 5) * 100}%` }}/></div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 mt-4">
@@ -573,10 +573,10 @@ export const TeacherDashboard = ({
                                 
                                 <div className="grid grid-cols-4 gap-2 text-center text-[11px]">
                                   {/* Headers */}
-                                  <div className="text-start text-slate-400 dark:text-slate-500 font-medium py-1">{t('period')}</div>
-                                  <div className="text-slate-400 dark:text-slate-500 font-medium py-1">{t('recitation')}</div>
-                                  <div className="text-slate-400 dark:text-slate-500 font-medium py-1">{t('memorization')}</div>
-                                  <div className="text-slate-400 dark:text-slate-500 font-medium py-1 font-bold">{t('points')}</div>
+                                  <div className="text-start text-slate-500 dark:text-slate-400 font-medium py-1">{t('period')}</div>
+                                  <div className="text-slate-500 dark:text-slate-400 font-medium py-1">{t('recitation')}</div>
+                                  <div className="text-slate-500 dark:text-slate-400 font-medium py-1">{t('memorization')}</div>
+                                  <div className="text-slate-500 dark:text-slate-400 font-medium py-1 font-bold">{t('points')}</div>
                                   
                                   {/* Week Row */}
                                   <div className="text-start text-slate-600 dark:text-slate-350 font-bold py-2 border-t border-slate-100 dark:border-slate-800/85 flex items-center">{t('thisWeek')}</div>
@@ -627,12 +627,12 @@ export const TeacherDashboard = ({
                       </div>
                   ) : (
                       /* Desktop details placeholder */
-                      <div className="hidden lg:flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 p-8 text-center bg-slate-50 dark:bg-slate-950">
+                      <div className="hidden lg:flex flex-col items-center justify-center h-full text-slate-500 dark:text-slate-400 p-8 text-center bg-slate-50 dark:bg-slate-950">
                         <div className="w-20 h-20 bg-blue-50 dark:bg-blue-950/20 text-blue-500/80 dark:text-blue-400 rounded-3xl flex items-center justify-center mb-6 shadow-sm border border-blue-100 dark:border-blue-900/50">
                           <BookOpen size={40} className="animate-bounce-slow text-blue-600 dark:text-blue-400" />
                         </div>
                         <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('studentProgressDetails')}</h3>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs leading-relaxed">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
                           {t('selectStudentPrompt')}
                         </p>
                       </div>
@@ -642,7 +642,7 @@ export const TeacherDashboard = ({
 
           {/* Persistent Bottom Navigation */}
           <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center z-50 max-w-md mx-auto shadow-[0_-5px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_-5px_20px_rgba(0,0,0,0.25)] px-6 py-2 lg:hidden">
-            <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 p-2 active:scale-95 transition-transform">
+            <button onClick={() => { setShowSettings(true); }} className="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 p-2 active:scale-95 transition-transform">
               <Settings size={22} />
               <span className="text-[10px] font-bold">{t('settings')}</span>
             </button>
@@ -654,7 +654,7 @@ export const TeacherDashboard = ({
                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">{t('add')}</span>
             </button>
 
-            <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}>
+            <button onClick={() => { if(activeStudentId) { playSound(SFX_CLICK); onSelectStudent(null); } }} className={`flex flex-col items-center gap-1 p-2 active:scale-95 transition-transform ${!activeStudentId ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>
               <Home size={22} />
               <span className="text-[10px] font-bold">{t('home')}</span>
             </button>

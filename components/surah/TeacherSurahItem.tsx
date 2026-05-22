@@ -58,7 +58,7 @@ const TeacherSurahItemComponent: React.FC<{
               {language === 'en' ? `${t('surahLabel')} ${surah.nameEn}` : `${t('surahLabel')} ${surah.name}`}
               {isFullyCompleted && (mode === 'memorization' ? <span className="text-xl">👑</span> : <Check size={16} className="text-green-500 dark:text-green-400" />)}
             </div>
-            <div className="text-xs text-slate-400 dark:text-slate-550 font-arabic flex gap-2"><span>{surah.nameAr}</span> • <span>{completedAyahs.length}/{surah.ayahs} {surah.ayahs === 1 ? t('ayah') : t('ayahs')}</span></div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-arabic flex gap-2"><span>{surah.nameAr}</span> • <span>{completedAyahs.length}/{surah.ayahs} {surah.ayahs === 1 ? t('ayah') : t('ayahs')}</span></div>
            </div>
         </div>
         <div className="flex items-center gap-3">
@@ -89,14 +89,14 @@ const TeacherSurahItemComponent: React.FC<{
                    
                    {reviewHistory.length > 0 && (
                       <div className="border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
-                          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-550 mb-2 flex items-center gap-1">
+                           <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
                               <History size={10} /> {t('reviewHistory')}
                           </div>
                           <div className="space-y-1">
                               {reviewHistory.map((ts, idx) => (
                                   <div key={idx} className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 p-1.5 rounded">
                                       <span className="font-bold">{idx + 1}. {new Date(ts).toLocaleDateString(language === 'en' ? 'en-US' : 'fa-IR')}</span>
-                                      <span className="text-slate-400 dark:text-slate-500">{new Date(ts).toLocaleTimeString(language === 'en' ? 'en-US' : 'fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                       <span className="text-slate-500 dark:text-slate-400">{new Date(ts).toLocaleTimeString(language === 'en' ? 'en-US' : 'fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
                                   </div>
                               ))}
                           </div>
@@ -109,7 +109,7 @@ const TeacherSurahItemComponent: React.FC<{
              <button onClick={(e) => { e.stopPropagation(); handleFullComplete(); }} className={`text-xs px-2 py-1 rounded bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-sm ${themeText} active:scale-95 transition-transform`}>{isFullyCompleted ? t('reviewAgain') : t('markAll')}</button>
            </div>
            <div className="grid grid-cols-5 gap-2">
-             {ayahsList.map(ayah => (<button key={ayah} onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} className={`aspect-square rounded-lg flex items-center justify-center text-sm font-bold border-b-2 transition-all ${completedAyahs.includes(ayah) ? `${themeBtn} text-white shadow-sm` : 'bg-white dark:bg-slate-850 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'}`}>{ayah}</button>))}
+              {ayahsList.map(ayah => (<button key={ayah} onClick={(e) => { e.stopPropagation(); handleAyahToggle(ayah); }} className={`aspect-square rounded-lg flex items-center justify-center text-sm font-bold border-b-2 transition-all ${completedAyahs.includes(ayah) ? `${themeBtn} text-white shadow-sm` : 'bg-white dark:bg-slate-850 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>{ayah}</button>))}
            </div>
         </div>
       )}

@@ -123,7 +123,7 @@ export const ImportStudentSheet = ({
                 </div>
 
                 {sourceStudents.length === 0 ? (
-                  <div className="text-center py-6 text-slate-400 dark:text-slate-550 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl">
+                  <div className="text-center py-6 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl">
                     {t('noStudentsInClass')}
                   </div>
                 ) : (
@@ -151,7 +151,7 @@ export const ImportStudentSheet = ({
                             </span>
                           </div>
                           {student.note && (
-                            <span className="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[150px]">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
                               {student.note}
                             </span>
                           )}
@@ -176,7 +176,7 @@ export const ImportStudentSheet = ({
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
                       {t('keepHistory')}
                     </span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-550 mt-1 leading-normal">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
                       {t('keepHistoryDesc')}
                     </span>
                   </div>

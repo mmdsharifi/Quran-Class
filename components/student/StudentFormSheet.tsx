@@ -65,16 +65,16 @@ export const StudentFormSheet = ({
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('studentName')}</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-850 rounded-xl p-3 font-bold text-slate-700 dark:text-slate-200 focus:border-blue-500 dark:focus:border-blue-400 outline-none" placeholder={t('studentNamePlaceholder')} required />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-850 rounded-xl p-3 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none" placeholder={t('studentNamePlaceholder')} required />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{t('note')}</label>
-              <input type="text" value={note} onChange={(e) => setNote(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-850 rounded-xl p-3 text-slate-600 dark:text-slate-300 focus:border-blue-500 dark:focus:border-blue-400 outline-none" placeholder={t('notePlaceholder')} />
+              <input type="text" value={note} onChange={(e) => setNote(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-850 rounded-xl p-3 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 dark:focus:border-blue-400 outline-none" placeholder={t('notePlaceholder')} />
             </div>
           </div>
 
           <div className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 shadow-sm">
-             <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 mb-3 text-center">{t('manualPointsSetting')}</label>
+             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 text-center">{t('manualPointsSetting')}</label>
              <div className="flex justify-between gap-2">
                 <div className="flex-1 flex flex-col items-center gap-2">
                    <span className="text-xl">💎</span>

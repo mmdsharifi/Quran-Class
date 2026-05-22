@@ -183,7 +183,7 @@ export const ClassManagementSheet = ({
           {!showAddForm && (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500">{t('classesList')}</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{t('classesList')}</span>
                 <button
                   onClick={() => setShowAddForm(true)}
                   className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold flex items-center gap-1 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg transition-colors"
@@ -206,16 +206,16 @@ export const ClassManagementSheet = ({
                       >
                         <div className="grid grid-cols-4 gap-2">
                           <div className="col-span-3">
-                            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">{t('className')}</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('className')}</label>
                             <input
                               type="text"
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">{t('emoji')}</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('emoji')}</label>
                             <select
                               value={editEmoji}
                               onChange={(e) => setEditEmoji(e.target.value)}
@@ -230,23 +230,23 @@ export const ClassManagementSheet = ({
 
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">{t('startDate')}</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('startDate')}</label>
                             <input
                               type="text"
                               value={editStartDate}
                               onChange={(e) => setEditStartDate(e.target.value)}
                               placeholder={t('startPlaceholder')}
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-600 dark:text-slate-300 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-0.5">{t('endDate')}</label>
+                            <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">{t('endDate')}</label>
                             <input
                               type="text"
                               value={editEndDate}
                               onChange={(e) => setEditEndDate(e.target.value)}
                               placeholder={t('endPlaceholder')}
-                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-600 dark:text-slate-300 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                             />
                           </div>
                         </div>
@@ -293,7 +293,7 @@ export const ClassManagementSheet = ({
                               </span>
                             )}
                           </span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                             {studentCount} {t('persons')}
                             {c.startDate && ` | ${t('courseLabel')} ${c.startDate} ${t('to')} ${c.endDate || '---'}`}
                           </span>
@@ -319,7 +319,7 @@ export const ClassManagementSheet = ({
                         {classes.length > 1 && (
                           <button
                             onClick={(e) => handleDelete(c.id, c.name, e)}
-                            className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                            className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400"
                             title={t('deleteClassConfirmTitle')}
                           >
                             <Trash2 size={14} />
@@ -336,10 +336,10 @@ export const ClassManagementSheet = ({
                 <div className="mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">
                   <button
                     onClick={() => setShowArchived(!showArchived)}
-                    className="w-full flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 py-1"
+                    className="w-full flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 py-1"
                   >
                     <span className="flex items-center gap-1.5">
-                      <Archive size={14} className="text-slate-400 dark:text-slate-500" />
+                      <Archive size={14} className="text-slate-500 dark:text-slate-400" />
                       {t('archivedClassesTitle', { count: archivedClasses.length })}
                     </span>
                     <ChevronRight
@@ -363,7 +363,7 @@ export const ClassManagementSheet = ({
                                 <span className="font-bold text-sm text-slate-500 dark:text-slate-400">
                                   {c.name}
                                 </span>
-                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                                   {studentCount} {t('persons')}
                                   {c.startDate && ` | ${t('courseLabel')} ${c.startDate} ${t('to')} ${c.endDate || '---'}`}
                                 </span>
@@ -380,7 +380,7 @@ export const ClassManagementSheet = ({
                               </button>
                               <button
                                 onClick={(e) => handleDelete(c.id, c.name, e)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
+                                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400"
                                 title={t('deleteStudent')}
                               >
                                 <Trash2 size={14} />
@@ -404,7 +404,7 @@ export const ClassManagementSheet = ({
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1"
+                  className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1"
                 >
                   <Undo2 size={12} /> {t('list')}
                 </button>
@@ -417,7 +417,7 @@ export const ClassManagementSheet = ({
                     type="text"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-sm text-slate-700 dark:text-slate-250 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 font-bold text-sm text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     placeholder={t('classNamePlaceholder')}
                     required
                   />
@@ -451,7 +451,7 @@ export const ClassManagementSheet = ({
                       value={newStartDate}
                       onChange={(e) => setNewStartDate(e.target.value)}
                       placeholder={t('startPlaceholder')}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-600 dark:text-slate-300 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -461,7 +461,7 @@ export const ClassManagementSheet = ({
                       value={newEndDate}
                       onChange={(e) => setNewEndDate(e.target.value)}
                       placeholder={t('endPlaceholder')}
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-600 dark:text-slate-300 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -472,7 +472,7 @@ export const ClassManagementSheet = ({
                     type="text"
                     value={firstStudentName}
                     onChange={(e) => setFirstStudentName(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-600 dark:text-slate-300 outline-none focus:border-blue-400 dark:focus:border-blue-500"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 outline-none focus:border-blue-400 dark:focus:border-blue-500"
                     placeholder={t('firstStudentPlaceholder')}
                   />
                 </div>

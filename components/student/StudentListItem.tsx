@@ -314,7 +314,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
             <div className="flex items-center gap-3">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-b-2 shadow-sm transition-all ${
-                  isEditMode ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 scale-90' : rankStyle
+                  isEditMode ? 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 scale-90' : rankStyle
                 }`}
               >
                 {isEditMode ? <Edit size={18} /> : globalIndex + 1}
@@ -324,7 +324,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                   {student.name}
                 </div>
                 {!isEditMode && (
-                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
                     {timeFilter === 'all' ? (
                       <>
                         {student.diamonds > 0 && (
@@ -374,7 +374,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
                           stats.diamonds === 0 &&
                           stats.stars === 0 &&
                           stats.pluses === 0 && (
-                            <span className="text-[10px] text-slate-300 dark:text-slate-600 italic">
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 italic">
                               {t('noActivity')}
                             </span>
                           )
@@ -386,7 +386,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
               </div>
             </div>
             {isEditMode ? (
-              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-400 dark:text-slate-500">
+              <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-500 dark:text-slate-400">
                 <Settings size={16} />
               </div>
             ) : Object.keys(student.memorizationProgress || {}).some(
@@ -403,7 +403,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({
           </div>
           {!isEditMode && student.note && (
             <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg flex items-start gap-1 w-full text-start border border-slate-100 dark:border-slate-800/80">
-              <StickyNote size={10} className="mt-0.5 text-slate-400 dark:text-slate-500 shrink-0" />
+              <StickyNote size={10} className="mt-0.5 text-slate-500 dark:text-slate-400 shrink-0" />
               {student.note}
             </div>
           )}
